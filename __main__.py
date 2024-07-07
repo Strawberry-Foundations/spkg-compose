@@ -1,0 +1,1 @@
+import spkg_compose.cli
