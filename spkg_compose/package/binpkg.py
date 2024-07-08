@@ -59,3 +59,5 @@ class SpkgBinPkgFormat:
         )
 
         os.system(f"mv {self.id}-{self.version}-{self.architecture}.binpkg ..")
+
+        return f"{self.id}-{self.version}-{self.architecture}.binpkg"
