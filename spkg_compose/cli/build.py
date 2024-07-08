@@ -74,6 +74,9 @@ def build(compose_file):
     print(f"{GREEN}{BOLD}Name: {CRESET}{package.meta.name}")
     print(f"{GREEN}{BOLD}Description: {CRESET}{package.meta.description}")
     print(f"{GREEN}{BOLD}Version: {CRESET}{package.meta.version}")
+    print(f"{GREEN}{BOLD}Architecture: {CRESET}{package.meta.architecture}")
+    print(f"{GREEN}{BOLD}Author: {CRESET}{package.meta.author}")
+    print(f"{GREEN}{BOLD}Package Format: {CRESET}{package.install.type_as}")
 
     try:
         os.mkdir("buildpkg")
@@ -91,10 +94,6 @@ def build(compose_file):
         os.chdir(package.build.workdir)
         os.system(package.builder.build_command)
 
-    match package.install.type_as:
-        case "deb":
-            package.install_pkg.makedeb()
-        case "binpkg":
-            package.install_pkg.makebinpkg()
+    package.install_pkg.makepkg()
 
     print()
