@@ -22,7 +22,7 @@ class SpkgBinPkgFormat:
         self.author = self.compose_data["Meta"]["Author"]
 
     def makepkg(self):
-        os.chdir(f"{execution_dir}/buildpkg")
+        os.chdir(f"{execution_dir}/_work")
         os.mkdir("_binpkg")
         os.chdir("_binpkg")
 
@@ -39,7 +39,7 @@ class SpkgBinPkgFormat:
             if not os.path.exists(current_path):
                 os.makedirs(current_path)
 
-        os.chdir(f"{execution_dir}/buildpkg")
+        os.chdir(f"{execution_dir}/_work")
         os.system(f"cp -r {self.build_workdir}/{self.target} _binpkg/{self.prefix}")
 
         if self.architecture == "OnBuildSystem":
