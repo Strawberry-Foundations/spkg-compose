@@ -3,6 +3,8 @@ from binpkg.metadata import Metadata
 import json
 import tarfile
 
+BINPKG_VERSION = "1.1"
+
 
 class BinPkg:
     def __init__(self, meta: Metadata, source: str, output: str):
@@ -14,7 +16,7 @@ class BinPkg:
     def create(cls, meta: Metadata, source_dir: str, output_file: str):
         metadata_json = json.dumps(meta.serialize()).encode('utf-8')
         metadata_length = len(metadata_json)
-        header = f"LENGTH={metadata_length}\n".encode('utf-8') + metadata_json
+        header = f"LENGTH={metadata_length},VERSION={BINPKG_VERSION}\n".encode('utf-8') + metadata_json
 
         with open(output_file, 'wb') as f:
             f.write(header)
@@ -29,13 +31,16 @@ class BinPkg:
     def read(cls, input_file: str):
         with open(input_file, 'rb') as f:
             length_line = f.readline().strip()
-            metadata_length = int(length_line.split(b'=')[1])
+            parts = length_line.split(b',')
+            metadata_length = int(parts[0].split(b'=')[1])
+            version = parts[1].split(b'=')[1].decode('utf-8')
 
             metadata_json = f.read(metadata_length)
-            meta = json.loads(metadata_json.decode('utf-8'))
+            meta_dict = json.loads(metadata_json.decode('utf-8'))
+            meta = Metadata.from_json(meta_dict)
 
         return cls(
-            meta=Metadata.from_json(meta),
+            meta=meta,
             source=input_file,
             output=None
         )
@@ -44,10 +49,13 @@ class BinPkg:
     def extract(cls, input_file: str, output_dir: str):
         with open(input_file, 'rb') as f:
             length_line = f.readline().strip()
-            metadata_length = int(length_line.split(b'=')[1])
+            parts = length_line.split(b',')
+            metadata_length = int(parts[0].split(b'=')[1])
+            version = parts[1].split(b'=')[1].decode('utf-8')
 
             metadata_json = f.read(metadata_length)
-            meta = json.loads(metadata_json.decode('utf-8'))
+            meta_dict = json.loads(metadata_json.decode('utf-8'))
+            meta = Metadata.from_json(meta_dict)
 
             f.read(1)
 
@@ -55,7 +63,7 @@ class BinPkg:
                 tar.extractall(path=output_dir)
 
         return cls(
-            meta=Metadata.from_json(meta),
+            meta=meta,
             source=input_file,
             output=output_dir
         )
@@ -63,7 +71,9 @@ class BinPkg:
     def self_extract(self, output_dir: str):
         with open(str(self.source), 'rb') as f:
             length_line = f.readline().strip()
-            metadata_length = int(length_line.split(b'=')[1])
+            parts = length_line.split(b',')
+            metadata_length = int(parts[0].split(b'=')[1])
+            version = parts[1].split(b'=')[1].decode('utf-8')
 
             metadata_json = f.read(metadata_length)
             _ = json.loads(metadata_json.decode('utf-8'))
