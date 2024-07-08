@@ -20,7 +20,7 @@ class SpkgDebPkgFormat:
         self.architecture = self.compose_data["Meta"]["Architecture"]
         self.author = self.compose_data["Meta"]["Author"]
 
-    def makedeb(self):
+    def makepkg(self):
         os.chdir(f"{execution_dir}/buildpkg")
         os.mkdir("_deb")
         os.chdir("_deb")
