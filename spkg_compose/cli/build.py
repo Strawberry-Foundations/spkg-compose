@@ -100,6 +100,8 @@ def build(compose_file):
         os.chdir(package.build.workdir)
         os.system(package.builder.build_command)
 
-    package.install_pkg.makepkg()
+    package = package.install_pkg.makepkg()
+
+    print(f"{BACK_GREEN}   OK   {BACK_RESET}  Package successfully build as '{package}'")
 
     print()
