@@ -1,3 +1,5 @@
+import platform
+
 from spkg_compose.core.parser import read
 from spkg_compose.package import SpkgBuild
 from spkg_compose.utils.colors import *
@@ -64,29 +66,33 @@ def _print_download_progress(file_path: Path, total_size) -> None:
 
 
 def build(compose_file):
+    def _get_arch(arch: str):
+        if arch == "OnBuildSystem":
+            return f"({platform.machine()})"
+
     data = read(compose_file)
 
     package = SpkgBuild(data)
 
-    print(f"{GREEN}{BOLD}[Compose] Building your package ...{CRESET}")
-    print(f"{GREEN}{BOLD}-----------------------------------{CRESET}\n")
+    print(f"{BACK_GREEN}  INFO  {BACK_RESET}  Starting package build process")
 
-    print(f"{GREEN}{BOLD}Name: {CRESET}{package.meta.name}")
-    print(f"{GREEN}{BOLD}Description: {CRESET}{package.meta.description}")
-    print(f"{GREEN}{BOLD}Version: {CRESET}{package.meta.version}")
-    print(f"{GREEN}{BOLD}Architecture: {CRESET}{package.meta.architecture}")
-    print(f"{GREEN}{BOLD}Author: {CRESET}{package.meta.author}")
-    print(f"{GREEN}{BOLD}Package Format: {CRESET}{package.install.type_as}")
+    print(f"  {CYAN}{BOLD}Package details:{CRESET}")
+    print(f"    {GREEN}{BOLD}Name: {CRESET}{package.meta.name}")
+    print(f"    {GREEN}{BOLD}Description: {CRESET}{package.meta.description}")
+    print(f"    {GREEN}{BOLD}Version: {CRESET}{package.meta.version}")
+    print(f"    {GREEN}{BOLD}Architecture: {CRESET}{package.meta.architecture} {_get_arch(package.meta.architecture)}")
+    print(f"    {GREEN}{BOLD}Author: {CRESET}{package.meta.author}")
+    print(f"    {GREEN}{BOLD}Package Format: {CRESET}{package.install.type_as}")
 
     try:
-        os.mkdir("buildpkg")
+        os.mkdir("_work")
     except FileExistsError:
-        shutil.rmtree("buildpkg")
-        os.mkdir("buildpkg")
+        shutil.rmtree("_work")
+        os.mkdir("_work")
 
     if package.prepare.type == "Archive":
         filename = package.prepare.url.split("/")[-1]
-        os.chdir("buildpkg")
+        os.chdir("_work")
 
         download_file(package.prepare.url, filename)
 
