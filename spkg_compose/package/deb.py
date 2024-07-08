@@ -69,3 +69,5 @@ Description: {self.description}
             os.system("dpkg-deb --build _deb")
             os.system(f"mv _deb.deb {self.id}-{self.version}-{architecture}.deb")
             os.system(f"mv {self.id}-{self.version}-{architecture}.deb ..")
+
+            return f"{self.id}-{self.version}-{architecture}.deb"
