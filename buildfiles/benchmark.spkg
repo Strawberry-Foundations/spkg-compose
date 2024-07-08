@@ -1,0 +1,25 @@
+[Meta]
+Name=Benchmark
+Id=benchmark
+Description=Simple benchmarking tool, written in rust
+Version=git+0ceb1d4
+Architecture=OnBuildSystem // OnBuildSystem: Architecture on build system
+Author=Strawberry Foundations <info@strawberryfoundations.org>
+	
+[Prepare]
+Type=Archive // Types: Git, Archive, BinaryArchive, Binary
+URL=https://github.com/Strawberry-Foundations/benchmark/archive/refs/heads/main.tar.gz
+
+[Build]
+BuildSys=cargo
+Workdir=benchmark-main
+
+[Build.cargo]
+Exec=cargo build --release
+
+[Install]
+As=binpkg // As: deb, binpkg
+
+[Install.binpkg]
+Prefix=/usr/bin/
+Target=target/release/benchmark	
