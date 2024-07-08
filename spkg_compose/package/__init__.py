@@ -69,4 +69,3 @@ class _SpkgPackageBuild:
 class _SpkgPackageInstall:
     def __init__(self):
         self.type_as = None
-
