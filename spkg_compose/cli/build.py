@@ -102,6 +102,6 @@ def build(compose_file):
 
     package = package.install_pkg.makepkg()
 
-    print(f"{BACK_GREEN}   OK   {BACK_RESET}  Package successfully build as '{package}'")
+    print(f"\n{BACK_GREEN}   OK   {BACK_RESET}  Package successfully build as '{package}'")
 
     print()
