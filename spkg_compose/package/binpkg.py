@@ -21,7 +21,7 @@ class SpkgBinPkgFormat:
         self.architecture = self.compose_data["Meta"]["Architecture"]
         self.author = self.compose_data["Meta"]["Author"]
 
-    def makebinpkg(self):
+    def makepkg(self):
         os.chdir(f"{execution_dir}/buildpkg")
         os.mkdir("_binpkg")
         os.chdir("_binpkg")
