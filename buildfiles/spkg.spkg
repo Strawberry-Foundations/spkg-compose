@@ -22,4 +22,4 @@ As=binpkg // As: deb, binpkg
 
 [Install.binpkg]
 Prefix=/
-Target=_work
+Target=_work/*
