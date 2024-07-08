@@ -29,16 +29,17 @@ class SpkgDebPkgFormat:
 
         path = ""
 
-        if self.prefix.startswith("/"):
-            path = self.prefix[1:]
+        if not self.prefix == "/":
+            if self.prefix.startswith("/"):
+                path = self.prefix[1:]
 
-        directories = path.split("/")
+            directories = path.split("/")
 
-        current_path = ""
-        for directory in directories:
-            current_path = os.path.join(current_path, directory)
-            if not os.path.exists(current_path):
-                os.makedirs(current_path)
+            current_path = ""
+            for directory in directories:
+                current_path = os.path.join(current_path, directory)
+                if not os.path.exists(current_path):
+                    os.makedirs(current_path)
 
         os.chdir(f"{execution_dir}/_work")
         os.system(f"cp -r {self.build_workdir}/{self.target} _deb/{self.prefix}")
