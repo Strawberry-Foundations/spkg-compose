@@ -1,4 +1,5 @@
 from spkg_compose.cli.build import build
+from spkg_compose.utils.colors import *
 
 from sys import argv
 
@@ -13,6 +14,6 @@ args = Args(cmd_args=argv)
 match args:
     case _:
         if len(args.args) < 2:
-            print("Missing compose file")
+            print(f"{BACK_RED}  ERROR  {BACK_RESET}  Missing compose file!")
             exit(1)
         build(compose_file=args.args[1])
