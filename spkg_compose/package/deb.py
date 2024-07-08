@@ -21,7 +21,7 @@ class SpkgDebPkgFormat:
         self.author = self.compose_data["Meta"]["Author"]
 
     def makepkg(self):
-        os.chdir(f"{execution_dir}/buildpkg")
+        os.chdir(f"{execution_dir}/_work")
         os.mkdir("_deb")
         os.chdir("_deb")
 
@@ -40,7 +40,7 @@ class SpkgDebPkgFormat:
             if not os.path.exists(current_path):
                 os.makedirs(current_path)
 
-        os.chdir(f"{execution_dir}/buildpkg")
+        os.chdir(f"{execution_dir}/_work")
         os.system(f"cp -r {self.build_workdir}/{self.target} _deb/{self.prefix}")
 
         architecture = "all"
@@ -64,7 +64,7 @@ Description: {self.description}
 
             _deb_control.close()
 
-            os.chdir(f"{execution_dir}/buildpkg")
+            os.chdir(f"{execution_dir}/_work")
 
             os.system("dpkg-deb --build _deb")
             os.system(f"mv _deb.deb {self.id}-{self.version}-{architecture}.deb")
