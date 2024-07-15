@@ -44,21 +44,21 @@ class SpkgDebPkgFormat:
         os.chdir(f"{execution_dir}/_work")
         os.system(f"cp -r {self.build_workdir}/{self.target} _deb/{self.prefix}")
 
-        architecture = "all"
+        self.architecture = "all"
 
         if self.architecture == "%runtime_arch%":
             match platform.machine():
                 case "x86_64":
-                    architecture = "amd64"
+                    self.architecture = "amd64"
                 case "aarch64":
-                    architecture = "arm64"
+                    self.architecture = "arm64"
                 case "x86":
-                    architecture = "i386"
+                    self.architecture = "i386"
 
         with open("_deb/DEBIAN/control", "w") as _deb_control:
             _deb_control.write(f"""Package: {self.id}
 Version: {self.version}
-Architecture: {architecture}
+Architecture: {self.architecture}
 Maintainer: {self.author}
 Description: {self.description}
 """)
@@ -68,7 +68,7 @@ Description: {self.description}
             os.chdir(f"{execution_dir}/_work")
 
             os.system("dpkg-deb --build _deb")
-            os.system(f"mv _deb.deb {self.id}-{self.version}-{architecture}.deb")
-            os.system(f"mv {self.id}-{self.version}-{architecture}.deb ..")
+            os.system(f"mv _deb.deb {self.id}-{self.version}-{self.architecture}.deb")
+            os.system(f"mv {self.id}-{self.version}-{self.architecture}.deb ..")
 
-            return f"{self.id}-{self.version}-{architecture}.deb"
+            return f"{self.id}-{self.version}-{self.architecture}.deb"
