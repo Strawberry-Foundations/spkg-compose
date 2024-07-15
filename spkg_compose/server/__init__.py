@@ -29,7 +29,7 @@ class Server:
                     name = package.meta.id
 
                     if name not in index:
-                        index[name] = {'file_path': file_path}
+                        index[name] = {'compose': file_path}
 
         with open(output_file, 'w') as json_file:
             json.dump(index, json_file, indent=2)
