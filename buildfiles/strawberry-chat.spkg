@@ -5,7 +5,7 @@ Description=A simple but nice chat platform for your terminal
 Version=1.11.1
 Architecture=%runtime_arch%
 Author=Strawberry Foundations <info@strawberryfoundations.org>
-Source=git+https://github.com/Strawberry-Foundations/strawberry-chat
+Source=https://github.com/Strawberry-Foundations/strawberry-chat
 	
 [Prepare]
 Type=Archive // Types: Git, Archive, BinaryArchive, Binary
