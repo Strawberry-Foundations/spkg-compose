@@ -13,7 +13,7 @@ class LogFormat:
         self.info = f"{C_RESET}{BOLD}[%<time>%] {GREEN}[%<levelname>%]{C_RESET}    [%<message>%]"
         self.ok = f"{C_RESET}{BOLD}[%<time>%] {BLUE}[%<levelname>%]{C_RESET}      [%<message>%]"
         self.error = f"{C_RESET}{BOLD}[%<time>%] {RED}[%<levelname>%]{C_RESET}   [%<message>%]"
-        self.default = f"{C_RESET}{BOLD}[%<time>%] {CYAN}INIT{C_RESET}   [%<message>%]"
+        self.default = f"{C_RESET}{BOLD}[%<time>%] {CYAN}INIT{C_RESET}    [%<message>%]"
         self.warning = f"{C_RESET}{BOLD}[%<time>%] {YELLOW}[%<levelname>%]{C_RESET} [%<message>%]"
         self.critical = f"{C_RESET}{BOLD}[%<time>%] {YELLOW}[%<levelname>%]{C_RESET} [%<message>%]"
         self.panic = f"{C_RESET}{BOLD}[%<time>%] {RED}[%<levelname>%]{C_RESET}   [%<message>%]"
