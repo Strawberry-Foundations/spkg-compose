@@ -5,6 +5,7 @@ UNDERLINE = '\033[4m'
 STRIKETHROUGH = '\033[9m'
 
 CRESET = '\033[0m'
+C_RESET = '\033[0m'
 
 # Basic Colors
 BLACK = "\033[30m"
