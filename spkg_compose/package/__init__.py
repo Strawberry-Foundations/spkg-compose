@@ -18,6 +18,8 @@ class SpkgBuild:
         match data["Build"]["BuildSys"]:
             case "cargo":
                 self.builder = SpkgPackageBuilder.Cargo(data)
+            case "any":
+                self.builder = SpkgPackageBuilder.Any(data)
 
         match data["Install"]["As"]:
             case "deb":
