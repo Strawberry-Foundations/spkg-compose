@@ -9,6 +9,7 @@ with open(init_dir + "/data/config.yml", "r") as _config:
 class Config:
     def __init__(self):
         self.data_dir = config_data["server"]["data_dir"]
+        self.routines = config_data["routines"]
 
 
 config = Config()
