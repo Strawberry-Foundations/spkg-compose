@@ -2,6 +2,7 @@ from spkg_compose import SERVER_VERSION, init_dir
 from spkg_compose.server.config import config as _cfg
 from spkg_compose.core.parser import read
 from spkg_compose.cli.logger import logger, current_time
+from spkg_compose.server.git import fetch_git
 from spkg_compose.utils.colors import *
 from spkg_compose.package import SpkgBuild
 
@@ -21,19 +22,17 @@ class Server:
         }
 
         self.config = _cfg
+        self.index = f"{init_dir}/data/index.json"
 
     def indexing(self):
-        directory = self.config.data_dir
-        output_file = f"{init_dir}/data/index.json"
-
         logger.info(f"{MAGENTA}routines@indexing{CRESET}: Starting indexing")
-        if os.path.exists(output_file):
-            with open(output_file, 'r') as json_file:
+        if os.path.exists(self.index):
+            with open(self.index, 'r') as json_file:
                 index = json.load(json_file)
         else:
             index = {}
 
-        for root, _, files in os.walk(directory):
+        for root, _, files in os.walk(self.config.data_dir):
             for file in files:
                 if file.endswith('.spkg'):
                     file_path = os.path.join(root, file)
@@ -46,13 +45,13 @@ class Server:
                         logger.info(f"Found new compose package '{CYAN}{name}{CRESET}'")
                         index[name] = {'compose': file_path}
 
-        with open(output_file, 'w') as json_file:
+        with open(self.index, 'w') as json_file:
             json.dump(index, json_file, indent=2)
         logger.ok(f"{MAGENTA}routines@indexing{CRESET}: Finished indexing")
 
     def fetch_git(self):
         logger.info(f"{MAGENTA}routines@fetch_git{CRESET}: Starting git fetch")
-        time.sleep(2)
+        fetch_git(self)
         logger.info(f"{MAGENTA}routines@fetch_git{CRESET}: Finished git fetch")
 
     def run_routine(self, routine):
