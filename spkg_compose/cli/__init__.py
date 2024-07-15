@@ -1,9 +1,11 @@
 from spkg_compose.cli.build import build
 from spkg_compose.cli.args import Args
 from spkg_compose.cli.help import help_cmd
+from spkg_compose.cli.logger import Logger
 from spkg_compose.utils.colors import *
 
 args = Args()
+logger = Logger()
 
 try:
     command = args.get(1)
