@@ -14,12 +14,12 @@ URL=https://github.com/Strawberry-Foundations/sbos-scripts/archive/refs/heads/ma
 BuildSys=any
 Workdir=sbos-scripts-main
 
-[Build.cargo]
-Exec=cargo build --release && bash configure.sh
+[Build.any]
+Exec=true
 
 [Install]
 As=binpkg // As: deb, binpkg
 
 [Install.binpkg]
-Prefix=/
-Target=_work/*
+Prefix=/usr/share/bash-completion/completions
+Target=bash_completions
