@@ -2,12 +2,10 @@ from spkg_compose.utils.colors import *
 from enum import Enum
 from datetime import datetime
 
-import pytz
 
-
-def current_time(time_format: str) -> str:
-    local = datetime.now(pytz.timezone('Local'))
-    return local.strftime(time_format)
+def current_time(time_fmt: str) -> str:
+    local = datetime.now()
+    return local.strftime(time_fmt)
 
 
 class LogFormat:
@@ -84,3 +82,5 @@ class Logger:
 
     def panic(self, log_message: str):
         print(self.parse(LogLevel.PANIC, log_message))
+
+logger = Logger()
