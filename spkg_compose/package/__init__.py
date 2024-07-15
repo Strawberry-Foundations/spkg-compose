@@ -36,6 +36,7 @@ class SpkgBuild:
         self.meta.version = self.compose_data["Meta"]["Version"]
         self.meta.architecture = self.compose_data["Meta"]["Architecture"]
         self.meta.author = self.compose_data["Meta"]["Author"]
+        self.meta.source = self.compose_data["Meta"]["Source"]
 
         self.prepare.type = self.compose_data["Prepare"]["Type"]
         self.prepare.url = self.compose_data["Prepare"]["URL"]
@@ -54,6 +55,7 @@ class _SpkgPackageMeta:
         self.version = None
         self.architecture = None
         self.author = None
+        self.source = None
 
 
 class _SpkgPackagePrepare:
