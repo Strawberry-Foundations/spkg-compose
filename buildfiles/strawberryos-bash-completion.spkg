@@ -5,7 +5,7 @@ Description=Bash completions for StrawberryOS
 Version=1.0
 Architecture=all
 Author=Strawberry Foundations <info@strawberryfoundations.org>
-Source=git+https://github.com/Strawberry-Foundations/sbos-scripts
+Source=https://github.com/Strawberry-Foundations/sbos-scripts
 
 [Prepare]
 Type=Archive // Types: Git, Archive, BinaryArchive, Binary
