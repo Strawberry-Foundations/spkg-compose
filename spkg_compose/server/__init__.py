@@ -1,20 +1,32 @@
 from spkg_compose import SERVER_VERSION, init_dir
-from spkg_compose.server.config import config
+from spkg_compose.server.config import config as _cfg
 from spkg_compose.core.parser import read
-from spkg_compose.cli.logger import logger
+from spkg_compose.cli.logger import logger, current_time
+from spkg_compose.utils.colors import *
+from spkg_compose.package import SpkgBuild
+
+from datetime import datetime, timedelta
 
 import os
 import json
-
-from spkg_compose.package import SpkgBuild
+import time
+import threading
 
 
 class Server:
     def __init__(self):
-        pass
+        self.routine_processes = {
+            "indexing": self.indexing,
+            "fetch_git": self.fetch_git
+        }
 
-    def index_spkg_files(self, directory: str, output_file: str):
-        logger.info("Starting indexing")
+        self.config = _cfg
+
+    def indexing(self):
+        directory = self.config.data_dir
+        output_file = f"{init_dir}/data/index.json"
+
+        logger.info(f"{MAGENTA}routines@indexing{CRESET}: Starting indexing")
         if os.path.exists(output_file):
             with open(output_file, 'r') as json_file:
                 index = json.load(json_file)
@@ -31,18 +43,68 @@ class Server:
                     name = package.meta.id
 
                     if name not in index:
+                        logger.info(f"Found new compose package '{CYAN}{name}{CRESET}'")
                         index[name] = {'compose': file_path}
 
         with open(output_file, 'w') as json_file:
             json.dump(index, json_file, indent=2)
-        logger.info("Finished indexing")
+        logger.ok(f"{MAGENTA}routines@indexing{CRESET}: Finished indexing")
+
+    def fetch_git(self):
+        logger.info(f"{MAGENTA}routines@fetch_git{CRESET}: Starting git fetch")
+        time.sleep(2)
+        logger.info(f"{MAGENTA}routines@fetch_git{CRESET}: Finished git fetch")
+
+    def run_routine(self, routine):
+        process_name = routine['process']
+        every = routine['every']
+        interval = self.parse_interval(every)
+
+        next_run = datetime.now()
+
+        while True:
+            time_fmt = current_time("%Y-%m-%d %H:%M:%S")
+            now = datetime.now()
+
+            if now >= next_run:
+                logger.routine(f"Running routine '{CYAN}{routine['name']}{RESET}' at {time_fmt}")
+                self.routine_processes[process_name]()
+                next_run = now + interval
+
+            time.sleep(1)
+
+    def parse_interval(self, interval_str):
+        units = {
+            'h': 'hours',
+            'm': 'minutes',
+            's': 'seconds'
+        }
+        amount = int(interval_str[:-1])
+        unit = interval_str[-1]
+        kwargs = {units[unit]: amount}
+        return timedelta(**kwargs)
 
     def run(self):
-        self.index_spkg_files(config.data_dir, f"{init_dir}/data/index.json")
+        i = 0
+        len_routines = len(self.config.routines)
+        try:
+            threads = []
+            for routine in self.config.routines:
+                i += 1
+                logger.info(f"Registering routine '{CYAN}{routine['name']}{RESET}' ({i}/{len_routines})")
+                thread = threading.Thread(target=self.run_routine, args=(routine,))
+                thread.daemon = True
+                threads.append(thread)
+                thread.start()
+
+            for thread in threads:
+                thread.join()
+        except KeyboardInterrupt:
+            logger.warning("spkg-compose server will be terminated")
 
 
 def server_main():
-    logger.info(f"Starting spkg-compose server v{SERVER_VERSION}")
+    logger.default(f"Starting spkg-compose server v{SERVER_VERSION}")
 
     server = Server()
     server.run()
