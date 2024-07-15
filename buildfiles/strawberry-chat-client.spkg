@@ -5,7 +5,7 @@ Description=Strawberry Chat (Client) is the official Strawberry Chat Client base
 Version=git+3927749
 Architecture=%runtime_arch%
 Author=Strawberry Foundations <info@strawberryfoundations.org>
-Source=git+https://github.com/Strawberry-Foundations/strawberry-chat-client
+Source=https://github.com/Strawberry-Foundations/strawberry-chat-client
 	
 [Prepare]
 Type=Archive // Types: Git, Archive, BinaryArchive, Binary
