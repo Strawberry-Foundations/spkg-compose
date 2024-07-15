@@ -3,7 +3,7 @@ Name=Benchmark
 Id=benchmark
 Description=Simple benchmarking tool, written in rust
 Version=git+0ceb1d4
-Architecture=OnBuildSystem // OnBuildSystem: Architecture on build system
+Architecture=%runtime_arch%
 Author=Strawberry Foundations <info@strawberryfoundations.org>
 	
 [Prepare]
