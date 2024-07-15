@@ -169,3 +169,4 @@ cython_debug/
 /debian
 /test.py
 /buildfiles_debian
+/local_repo
