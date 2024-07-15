@@ -46,7 +46,7 @@ class SpkgDebPkgFormat:
 
         architecture = "all"
 
-        if self.architecture == "OnBuildSystem":
+        if self.architecture == "%runtime_arch%":
             match platform.machine():
                 case "x86_64":
                     architecture = "amd64"
