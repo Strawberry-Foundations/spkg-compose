@@ -5,7 +5,7 @@ Description=spkg is a package manager that downloads the source code from the of
 Version=git+c056a7c
 Architecture=%runtime_arch%
 Author=Strawberry Foundations <info@strawberryfoundations.org>
-Source=git+https://github.com/Strawberry-Foundations/spkg
+Source=https://github.com/Strawberry-Foundations/spkg
 
 [Prepare]
 Type=Archive // Types: Git, Archive, BinaryArchive, Binary
