@@ -23,8 +23,10 @@ class Server:
 
         self.config = _cfg
         self.index = f"{init_dir}/data/index.json"
+        self.running_indexing = False
 
     def indexing(self):
+        self.running_indexing = True
         logger.info(f"{MAGENTA}routines@indexing{CRESET}: Starting indexing")
         if os.path.exists(self.index):
             with open(self.index, 'r') as json_file:
@@ -48,11 +50,17 @@ class Server:
         with open(self.index, 'w') as json_file:
             json.dump(index, json_file, indent=2)
         logger.ok(f"{MAGENTA}routines@indexing{CRESET}: Finished indexing")
+        self.running_indexing = False
 
     def fetch_git(self):
-        logger.info(f"{MAGENTA}routines@fetch_git{CRESET}: Starting git fetch")
-        fetch_git(self)
-        logger.info(f"{MAGENTA}routines@fetch_git{CRESET}: Finished git fetch")
+        while True:
+            if self.running_indexing:
+                time.sleep(1)
+                continue
+            logger.info(f"{MAGENTA}routines@fetch_git{CRESET}: Starting git fetch")
+            fetch_git(self)
+            logger.info(f"{MAGENTA}routines@fetch_git{CRESET}: Finished git fetch")
+            break
 
     def run_routine(self, routine):
         process_name = routine['process']
