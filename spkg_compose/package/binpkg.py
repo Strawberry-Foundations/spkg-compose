@@ -43,7 +43,7 @@ class SpkgBinPkgFormat:
         os.chdir(f"{execution_dir}/_work")
         os.system(f"cp -r {self.build_workdir}/{self.target} _binpkg/{self.prefix}")
 
-        if self.architecture == "OnBuildSystem":
+        if self.architecture == "%runtime_arch%":
             self.architecture = platform.machine()
 
         BinPkg.create(
