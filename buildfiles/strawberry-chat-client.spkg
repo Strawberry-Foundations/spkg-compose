@@ -3,7 +3,7 @@ Name=Strawberry Chat Client
 Id=strawberry-chat-client
 Description=Strawberry Chat (Client) is the official Strawberry Chat Client based on Rust
 Version=git+3927749
-Architecture=OnBuildSystem // OnBuildSystem: Architecture on build system
+Architecture=%runtime_arch%
 Author=Strawberry Foundations <info@strawberryfoundations.org>
 	
 [Prepare]
