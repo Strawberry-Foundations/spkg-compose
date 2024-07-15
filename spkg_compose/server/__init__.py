@@ -12,6 +12,9 @@ import os
 import json
 import time
 import threading
+import requests
+
+from spkg_compose.utils.time import unix_to_readable
 
 
 class Server:
@@ -24,42 +27,67 @@ class Server:
         self.config = _cfg
         self.index = f"{init_dir}/data/index.json"
         self.running_indexing = False
+        self.running_gitfetch = False
 
     def indexing(self):
-        self.running_indexing = True
-        logger.info(f"{MAGENTA}routines@indexing{CRESET}: Starting indexing")
-        if os.path.exists(self.index):
-            with open(self.index, 'r') as json_file:
-                index = json.load(json_file)
-        else:
-            index = {}
+        while True:
+            if self.running_gitfetch:
+                time.sleep(1)
+                continue
+            self.running_indexing = True
+            logger.info(f"{MAGENTA}routines@indexing{CRESET}: Starting indexing")
+            if os.path.exists(self.index):
+                with open(self.index, 'r') as json_file:
+                    index = json.load(json_file)
+            else:
+                index = {}
 
-        for root, _, files in os.walk(self.config.data_dir):
-            for file in files:
-                if file.endswith('.spkg'):
-                    file_path = os.path.join(root, file)
+            for root, _, files in os.walk(self.config.data_dir):
+                for file in files:
+                    if file.endswith('.spkg'):
+                        file_path = os.path.join(root, file)
 
-                    data = read(file_path)
-                    package = SpkgBuild(data)
-                    name = package.meta.id
+                        data = read(file_path)
+                        package = SpkgBuild(data)
+                        name = package.meta.id
 
-                    if name not in index:
-                        logger.info(f"Found new compose package '{CYAN}{name}{CRESET}'")
-                        index[name] = {'compose': file_path}
+                        if name not in index:
+                            logger.info(f"Found new compose package '{CYAN}{name}{CRESET}'")
+                            index[name] = {'compose': file_path}
 
-        with open(self.index, 'w') as json_file:
-            json.dump(index, json_file, indent=2)
-        logger.ok(f"{MAGENTA}routines@indexing{CRESET}: Finished indexing")
-        self.running_indexing = False
+            with open(self.index, 'w') as json_file:
+                json.dump(index, json_file, indent=2)
+            logger.ok(f"{MAGENTA}routines@indexing{CRESET}: Finished indexing")
+            self.running_indexing = False
+            break
 
     def fetch_git(self):
         while True:
             if self.running_indexing:
                 time.sleep(1)
                 continue
+            self.running_gitfetch = True
             logger.info(f"{MAGENTA}routines@fetch_git{CRESET}: Starting git fetch")
+            headers = {
+                'Accept': 'application/vnd.github.v3+json',
+                'Authorization': f'Bearer {self.config.gh_token}'
+            }
+            response = requests.get("https://api.github.com/rate_limit", headers=headers)
+            result = response.json()
+            rlimit_limit = result["resources"]["core"]["limit"]
+            rlimit_remaining = result["resources"]["core"]["remaining"]
+            rlimit_reset = result["resources"]["core"]["reset"]
+
+            logger.info(f"{MAGENTA}routines@fetch_git{CRESET}: {rlimit_remaining} of {rlimit_limit} requests available")
+
+            if rlimit_remaining == 0:
+                logger.error(f"{MAGENTA}routines@fetch_git{CRESET}: API rate limit exceeded. Canceling routine")
+                logger.error(f"{MAGENTA}routines@fetch_git{CRESET}: The API rate limit will be reset on {unix_to_readable(rlimit_reset)}")
+                break
+
             fetch_git(self)
             logger.info(f"{MAGENTA}routines@fetch_git{CRESET}: Finished git fetch")
+            self.running_gitfetch = False
             break
 
     def run_routine(self, routine):
