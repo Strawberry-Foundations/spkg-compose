@@ -165,5 +165,5 @@ cython_debug/
 # spkg-compose directories
 /packages
 /_work
-/data.json
-buildfiles/debian
+/data
+/buildfiles/debian
