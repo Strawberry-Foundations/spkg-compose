@@ -4,6 +4,7 @@ from datetime import datetime
 
 import pytz
 
+
 def current_time(time_format: str) -> str:
     local = datetime.now(pytz.timezone('Local'))
     return local.strftime(time_format)
