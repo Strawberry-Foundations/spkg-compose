@@ -3,7 +3,7 @@ Name=Strawberry Chat
 Id=strawberry-chat
 Description=A simple but nice chat platform for your terminal
 Version=1.11.1
-Architecture=OnBuildSystem // OnBuildSystem: Architecture on build system
+Architecture=%runtime_arch%
 Author=Strawberry Foundations <info@strawberryfoundations.org>
 	
 [Prepare]
