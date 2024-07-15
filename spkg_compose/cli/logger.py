@@ -17,6 +17,7 @@ class LogFormat:
         self.warning = f"{C_RESET}{BOLD}[%<time>%] {YELLOW}[%<levelname>%]{C_RESET} [%<message>%]"
         self.critical = f"{C_RESET}{BOLD}[%<time>%] {YELLOW}[%<levelname>%]{C_RESET} [%<message>%]"
         self.panic = f"{C_RESET}{BOLD}[%<time>%] {RED}[%<levelname>%]{C_RESET}   [%<message>%]"
+        self.routine = f"{C_RESET}{BOLD}[%<time>%] {MAGENTA}[%<levelname>%]{C_RESET} [%<message>%]"
         self.time_fmt = "%Y-%m-%d %H:%M"
 
 
@@ -28,6 +29,7 @@ class LogLevel(Enum):
     CRITICAL = 4
     PANIC = 5
     OK = 6
+    ROUTINE = 7
 
 
 class Logger:
@@ -71,6 +73,11 @@ class Logger:
                     .replace("[%<levelname>%]", level.name) \
                     .replace("[%<message>%]", content) \
                     .replace("[%<time>%]", current_time(self.formatting.time_fmt))
+            case LogLevel.ROUTINE:
+                return self.formatting.routine \
+                    .replace("[%<levelname>%]", level.name) \
+                    .replace("[%<message>%]", content) \
+                    .replace("[%<time>%]", current_time(self.formatting.time_fmt))
 
     def default(self, log_message: str):
         print(self.parse(LogLevel.DEFAULT, log_message))
@@ -92,5 +99,8 @@ class Logger:
 
     def panic(self, log_message: str):
         print(self.parse(LogLevel.PANIC, log_message))
+
+    def routine(self, log_message: str):
+        print(self.parse(LogLevel.ROUTINE, log_message))
 
 logger = Logger()
