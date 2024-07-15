@@ -1,5 +1,8 @@
 from spkg_compose.core.parser import read
 from spkg_compose.package import SpkgBuild
+from spkg_compose.cli.logger import logger
+from spkg_compose.server.config import config
+from spkg_compose.utils.colors import *
 
 import os
 import requests
@@ -21,34 +24,39 @@ def fetch_git(server):
 
 
 def check_for_new_release_or_commit(repo_url):
-    api_url = convert_to_github_api_url(repo_url, 'releases')
-    headers = {'Accept': 'application/vnd.github.v3+json'}
+    api_url, repo = convert_to_github_api_url(repo_url, 'releases')
+    headers = {
+        'Accept': 'application/vnd.github.v3+json',
+        'Authorization': f'Bearer {config.gh_token}'
+    }
     response = requests.get(api_url, headers=headers)
 
     if response.status_code == 200:
         releases = response.json()
         if releases:
             latest_release = releases[0]
-            print(f"New release found for {repo_url}: {latest_release['tag_name']}")
+            logger.info(f"{MAGENTA}routines@fetch_git{CRESET}: Release found for {repo}: {latest_release['tag_name']}")
         else:
-            print(f"No releases found for {repo_url}. Checking latest commit.")
             check_latest_commit(repo_url)
     else:
-        print(f"Failed to fetch releases for {repo_url}")
+        logger.error(f"Error while fetching {repo} (Status code {response.status_code})")
 
 
 def check_latest_commit(repo_url):
-    api_url = convert_to_github_api_url(repo_url, 'commits')
-    headers = {'Accept': 'application/vnd.github.v3+json'}
+    api_url, repo = convert_to_github_api_url(repo_url, 'commits')
+    headers = {
+        'Accept': 'application/vnd.github.v3+json',
+        'Authorization': f'Bearer {config.gh_token}'
+    }
     response = requests.get(api_url, headers=headers)
 
     if response.status_code == 200:
         commits = response.json()
         if commits:
             latest_commit = commits[0]
-            print(f"Latest commit for {repo_url}: {latest_commit['sha']}")
+            logger.info(f"{MAGENTA}routines@fetch_git{CRESET}: Latest commit for {repo}: {latest_commit['sha']}")
     else:
-        print(f"Failed to fetch commits for {repo_url}")
+        logger.error(f"Error while fetching {repo} (Status code {response.status_code})")
 
 
 def convert_to_github_api_url(repo_url, endpoint):
@@ -56,4 +64,4 @@ def convert_to_github_api_url(repo_url, endpoint):
     owner = parts[-2]
     repo = parts[-1]
     api_url = f"https://api.github.com/repos/{owner}/{repo}/{endpoint}"
-    return api_url
+    return api_url, f"{owner}/{repo}"
