@@ -166,5 +166,6 @@ cython_debug/
 /packages
 /_work
 /data
-/buildfiles/debian
+/debian
 /test.py
+/buildfiles_debian
