@@ -1,4 +1,5 @@
 from spkg_compose import SERVER_VERSION, init_dir
+from spkg_compose.server.config import config
 from spkg_compose.core.parser import read
 from spkg_compose.cli.logger import logger
 
@@ -13,6 +14,7 @@ class Server:
         pass
 
     def index_spkg_files(self, directory: str, output_file: str):
+        logger.info("Starting indexing")
         if os.path.exists(output_file):
             with open(output_file, 'r') as json_file:
                 index = json.load(json_file)
@@ -33,10 +35,10 @@ class Server:
 
         with open(output_file, 'w') as json_file:
             json.dump(index, json_file, indent=2)
+        logger.info("Finished indexing")
 
     def run(self):
-        logger.info("Starting indexing")
-        self.index_spkg_files(f"{init_dir}", f"{init_dir}/data/index.json")
+        self.index_spkg_files(config.data_dir, f"{init_dir}/data/index.json")
 
 
 def server_main():
