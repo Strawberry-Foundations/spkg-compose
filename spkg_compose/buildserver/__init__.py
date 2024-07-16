@@ -1,6 +1,7 @@
 from spkg_compose import BUILD_SERVER_VERSION, init_dir
 from spkg_compose.buildserver.config import config as _cfg
 from spkg_compose.cli.logger import logger
+from spkg_compose.server import convert_json_data, send_json
 from spkg_compose.utils.colors import *
 
 import socket
@@ -35,7 +36,27 @@ class BuildServer:
             threading.Thread(target=self.client_thread, args=(client,)).start()
 
     def client_thread(self, client: socket.socket):
-        pass
+        while self.running:
+            try:
+                message = client.recv(2048).decode('utf-8')
+                message = convert_json_data(message)
+                event = message["event"]
+
+                match event:
+                    case "test_connection":
+                        token = message["token"]
+
+                        if token != self.config.token:
+                            client.send(send_json({
+                                "response": "invalid_token",
+                            }).encode("utf8"))
+                        else:
+                            client.send(send_json({
+                                "response": "ok",
+                            }).encode("utf8"))
+            except:
+                logger.error(f"Failed to communicate with client")
+                break
 
     def run(self):
         try:
