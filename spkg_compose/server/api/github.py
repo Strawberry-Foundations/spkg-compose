@@ -153,7 +153,9 @@ class GitHubApi:
             logger.error(f"{MAGENTA}routines@git.build{CRESET}: Something went wrong while updating package")
             success = False
 
-        if not success:
+        if success:
+            logger.ok(f"{MAGENTA}routines@git.build{CRESET}: Build succeeded")
+        else:
             self.rollback(
                 compose_old=compose_old,
                 specfile_old=specfile_old,
