@@ -5,9 +5,10 @@ import requests
 
 
 class GitHubApi:
-    def __init__(self, repo_url, api_token):
+    def __init__(self, repo_url, api_token, server):
         self.repo_url = repo_url
         self.api_token = api_token
+        self.server = server
 
     def fetch(self):
         api_url, repo = self.to_gh_api_url("releases")
