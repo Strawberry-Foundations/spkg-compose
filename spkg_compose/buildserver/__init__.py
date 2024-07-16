@@ -97,7 +97,7 @@ class BuildServer:
                             client.send({"response": "invalid_token"})
                             logger.warning(f"{LIGHT_BLUE}auth{RESET}: Invalid token from '{CYAN}{client.address}{CRESET}'")
                         else:
-                            client.send({"response": "ok"})
+                            client.send({"response": "ok", "version": BUILD_SERVER_VERSION})
                             logger.ok(f"{LIGHT_BLUE}auth{RESET}: Token is valid")
                             authenticated[client] = True
 
