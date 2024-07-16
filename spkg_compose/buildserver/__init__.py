@@ -7,7 +7,19 @@ from spkg_compose.utils.colors import *
 import socket
 import threading
 import sys
-import time
+
+
+class Client:
+    def __init__(self, client: socket.socket, address):
+        self.socket = client
+        self.address = address
+
+    def recv(self):
+        raw_msg = self.socket.recv(2048).decode('utf-8')
+        return convert_json_data(raw_msg)
+
+    def send(self, data):
+        self.socket.send(send_json(data).encode("utf8"))
 
 
 class BuildServer:
@@ -33,13 +45,13 @@ class BuildServer:
             self.addresses[client] = address
 
             logger.info(f"Client '{address[0]}' connected")
+            client = Client(client, address)
             threading.Thread(target=self.client_thread, args=(client,)).start()
 
-    def client_thread(self, client: socket.socket):
+    def client_thread(self, client: Client):
         while self.running:
             try:
-                message = client.recv(2048).decode('utf-8')
-                message = convert_json_data(message)
+                message = client.recv()
                 event = message["event"]
 
                 match event:
@@ -47,15 +59,11 @@ class BuildServer:
                         token = message["token"]
 
                         if token != self.config.token:
-                            client.send(send_json({
-                                "response": "invalid_token",
-                            }).encode("utf8"))
+                            client.send({"response": "invalid_token"})
                         else:
-                            client.send(send_json({
-                                "response": "ok",
-                            }).encode("utf8"))
-            except:
-                logger.warning(f"Client disconnected")
+                            client.send({"response": "ok"})
+            except KeyboardInterrupt as err:
+                logger.warning(f"Client disconnected ({err})")
                 break
 
     def run(self):
