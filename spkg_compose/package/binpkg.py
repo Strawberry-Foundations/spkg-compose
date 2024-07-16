@@ -1,3 +1,5 @@
+import shutil
+
 from spkg_compose import execution_dir
 from binpkg import BinPkg
 from binpkg.metadata import Metadata
@@ -23,7 +25,11 @@ class SpkgBinPkgFormat:
 
     def makepkg(self):
         os.chdir(f"{execution_dir}/_work")
-        os.mkdir("_binpkg")
+        try:
+            os.mkdir("_binpkg")
+        except FileExistsError:
+            shutil.rmtree("_binpkg")
+
         os.chdir("_binpkg")
 
         path = ""
