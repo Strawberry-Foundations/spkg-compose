@@ -141,6 +141,8 @@ class GitHubApi:
 
     def update_package(self, version):
         logger.info(f"{MAGENTA}routines@git.build{CRESET}: Starting build process for {self.package.meta.id}-{version}")
+        """
+        logger.info(f"{MAGENTA}routines@git.build{CRESET}: Starting build process for {self.package.meta.id}-{version}")
 
         try:
             os.mkdir("_work")
@@ -160,4 +162,4 @@ class GitHubApi:
 
         package = self.package.install_pkg.makepkg()
 
-        logger.ok(f"{MAGENTA}routines@git.build{CRESET}: Package successfully build as '{CYAN}{package}{RESET}'")
+        logger.ok(f"{MAGENTA}routines@git.build{CRESET}: Package successfully build as '{CYAN}{package}{RESET}'")"""
