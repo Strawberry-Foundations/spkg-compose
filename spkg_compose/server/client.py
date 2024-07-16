@@ -21,7 +21,7 @@ class BuildServerClient:
         raw_msg = self.socket.recv(2048).decode('utf-8')
         return convert_json_data(raw_msg)
 
-    def auth(self, token: str, server_name: str):
+    def auth(self, token: str, server_name: str, silent: bool = False):
         self.send({
             "event": "auth",
             "token": token
@@ -31,10 +31,11 @@ class BuildServerClient:
         response = message["response"]
 
         if response == "ok":
-            logger.ok(
-                f"{MAGENTA}routines@git.build{CRESET}: Authentication successful with server "
-                f"'{CYAN}{server_name}{RESET}'"
-            )
+            if not silent:
+                logger.ok(
+                    f"{MAGENTA}routines@git.build{CRESET}: Authentication successful with server "
+                    f"'{CYAN}{server_name}{RESET}'"
+                )
 
         elif message["response"] == "invalid_token":
             logger.error(
