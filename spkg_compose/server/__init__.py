@@ -1,5 +1,3 @@
-import sys
-
 from spkg_compose import SERVER_VERSION, init_dir
 from spkg_compose.server.config import config as _cfg
 from spkg_compose.server.git import fetch_git
@@ -12,6 +10,7 @@ from spkg_compose.package import SpkgBuild
 from datetime import datetime, timedelta
 
 import os
+import sys
 import json
 import time
 import threading
