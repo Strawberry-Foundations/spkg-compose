@@ -172,7 +172,7 @@ class Server:
         available_bservers = 0
 
         for name, value in self.config.raw['build_server'].items():
-            logger.info(f"Trying to connect to build server '{CYAN}{name}{RESET}'")
+            logger.info(f"{MAGENTA}builserver@{name}{CRESET}: Trying to connect to build server '{CYAN}{name}{RESET}'")
             host, port = value["address"].split(":")
 
             try:
@@ -190,20 +190,28 @@ class Server:
                     if message["response"] == "ok":
                         available_bservers += 1
                         logger.ok(
-                            f"Successfully connected to build server '{CYAN}{name}{RESET}' at {MAGENTA}{host}:{port} {RESET}"
+                            f"{MAGENTA}builserver@{name}{CRESET}: Successfully connected to build server "
+                            f"'{CYAN}{name}{RESET}' at {MAGENTA}{host}:{port} {RESET}"
                         )
                     elif message["response"] == "invalid_token":
                         logger.error(
                             f"Invalid token for build server '{CYAN}{name}{RESET}'!"
                         )
                     else:
-                        logger.error(f"Build server '{CYAN}{name}{RESET}' did not send a valid response! ({message['response']})")
+                        logger.error(
+                            f"{MAGENTA}builserver@{name}{CRESET}: Build server '{CYAN}{name}{RESET}' "
+                            f"did not send a valid response! ({message['response']})"
+                        )
                 else:
-                    logger.error(f"Build server '{CYAN}{name}{RESET}' did not send a valid response! ({message})")
+                    logger.error(
+                        f"{MAGENTA}builserver@{name}{CRESET}: Build server '{CYAN}{name}{RESET}' "
+                        f"did not send a valid response! ({message})"
+                    )
 
             except Exception as err:
                 logger.error(
-                    f"Build server '{CYAN}{name}{RESET}' is not online! Please check if the build server is running ({err})"
+                    f"{MAGENTA}builserver@{name}{CRESET}: Build server '{CYAN}{name}{RESET}' is not online! "
+                    f"Please check if the build server is running ({err})"
                 )
 
         if available_bservers == 0:
