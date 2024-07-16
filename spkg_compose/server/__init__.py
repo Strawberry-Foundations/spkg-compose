@@ -194,7 +194,7 @@ class Server:
                     if message["response"] == "ok":
                         available_servers += 1
                         logger.ok(
-                            f"{MAGENTA}builserver@{name}{CRESET}: Successfully connected to build server "
+                            f"{MAGENTA}buildserver@{name}{CRESET}: Successfully connected to build server "
                             f"'{CYAN}{name}{RESET}' (version {CYAN}{message['version']}{RESET})"
                         )
                         _sock.send(send_json({
@@ -208,13 +208,13 @@ class Server:
                         _sock.close()
                     else:
                         logger.error(
-                            f"{MAGENTA}builserver@{name}{CRESET}: Build server '{CYAN}{name}{RESET}' "
+                            f"{MAGENTA}buildserver@{name}{CRESET}: Build server '{CYAN}{name}{RESET}' "
                             f"did not send a valid response! ({message['response']})"
                         )
                         _sock.close()
                 else:
                     logger.error(
-                        f"{MAGENTA}builserver@{name}{CRESET}: Build server '{CYAN}{name}{RESET}' "
+                        f"{MAGENTA}buildserver@{name}{CRESET}: Build server '{CYAN}{name}{RESET}' "
                         f"did not send a valid response! ({message})"
                     )
                     _sock.close()
