@@ -1,15 +1,17 @@
 from spkg_compose.cli.logger import logger
 from spkg_compose.utils.colors import *
+from spkg_compose.package import SpkgBuild
 
 import requests
 import json
 
 
 class GitHubApi:
-    def __init__(self, repo_url, api_token, server):
+    def __init__(self, repo_url, api_token, server, package: SpkgBuild):
         self.repo_url = repo_url
         self.api_token = api_token
         self.server = server
+        self.package = package
 
         with open(self.server.index, 'r') as json_file:
             self.index = json.load(json_file)
