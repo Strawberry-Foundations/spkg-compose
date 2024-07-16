@@ -29,7 +29,7 @@ class SpkgBinPkgFormat:
             os.mkdir("_binpkg")
         except FileExistsError:
             shutil.rmtree("_binpkg")
-
+            os.mkdir("_binpkg")
         os.chdir("_binpkg")
 
         path = ""

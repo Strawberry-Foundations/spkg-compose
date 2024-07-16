@@ -144,8 +144,11 @@ class BuildServer:
                         if package.prepare.type == "Archive":
                             filename = package.prepare.url.split("/")[-1]
                             os.chdir("_work")
-        
-                            download_file(package.prepare.url, filename)
+
+                            try:
+                                download_file(package.prepare.url, filename)
+                            except Exception as err:
+                                logger.warning(f"Exception occurred {err}")
         
                             os.system(f"tar xf {filename}")
                             os.chdir(package.build.workdir)
