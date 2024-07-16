@@ -78,11 +78,17 @@ class Server:
             rlimit_remaining = result["resources"]["core"]["remaining"]
             rlimit_reset = result["resources"]["core"]["reset"]
 
-            logger.info(f"{MAGENTA}routines@fetch_git{CRESET}: {rlimit_remaining} of {rlimit_limit} requests available")
+            logger.info(
+                f"{MAGENTA}routines@fetch_git{CRESET}: {rlimit_remaining} of {rlimit_limit} requests available "
+                f"(Will reset on {unix_to_readable(rlimit_reset)})"
+            )
 
             if rlimit_remaining == 0:
                 logger.error(f"{MAGENTA}routines@fetch_git{CRESET}: API rate limit exceeded. Canceling routine")
-                logger.error(f"{MAGENTA}routines@fetch_git{CRESET}: The API rate limit will be reset on {unix_to_readable(rlimit_reset)}")
+                logger.error(
+                    f"{MAGENTA}routines@fetch_git{CRESET}: The API rate limit will be reset on "
+                    f"{unix_to_readable(rlimit_reset)}"
+                )
                 break
 
             fetch_git(self)
