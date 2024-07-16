@@ -33,7 +33,7 @@ class BuildServerClient:
         if response == "ok":
             if not silent:
                 logger.ok(
-                    f"{MAGENTA}routines@git.build{CRESET}: Authentication successful with server "
+                    f"{MAGENTA}routines@git.build.{server_name}{CRESET}: Authentication successful with server "
                     f"'{CYAN}{server_name}{RESET}'"
                 )
 
