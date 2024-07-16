@@ -1,5 +1,6 @@
 from spkg_compose import BUILD_SERVER_VERSION, init_dir
 from spkg_compose.buildserver.config import config as _cfg
+from spkg_compose.cli.build import download_file
 from spkg_compose.cli.logger import logger
 from spkg_compose.package import SpkgBuild
 from spkg_compose.server import convert_json_data, send_json
@@ -8,6 +9,8 @@ from spkg_compose.utils.colors import *
 import socket
 import threading
 import sys
+import os
+import shutil
 
 addresses = {}
 
@@ -88,14 +91,18 @@ class BuildServer:
 
                     case "update_pkg":
                         package = SpkgBuild(message["data"])
-                        logger.info(
-                            f"Build request from '{CYAN}{client.address}{CRESET}' for package "
-                            f"'{GREEN}{package.meta.id}{RESET}', version {CYAN}{package.meta.version}{RESET}"
+                        logger.routine(
+                            f"{MAGENTA}rt@build{CRESET}: Build request from '{CYAN}{client.address}{CRESET}' for "
+                            f"package '{GREEN}{package.meta.id}{RESET}', version {CYAN}{package.meta.version}{RESET}"
                         )
-                        client.send({"response": "accept"})
 
-                        """
-                        logger.info(f"{MAGENTA}routines@git.build{CRESET}: Starting build process for {self.package.meta.id}-{version}")
+                        client.send({"response": "accept"})
+                        logger.routine(f"{MAGENTA}rt@build{CRESET}: Build request accepted")
+
+                        logger.routine(
+                            f"{MAGENTA}rt@build{CRESET}: Preparing build process for "
+                            f"{package.meta.id}-{package.meta.version}"
+                        )
         
                         try:
                             os.mkdir("_work")
@@ -103,19 +110,22 @@ class BuildServer:
                             shutil.rmtree("_work")
                             os.mkdir("_work")
         
-                        if self.package.prepare.type == "Archive":
-                            filename = self.package.prepare.url.split("/")[-1]
+                        if package.prepare.type == "Archive":
+                            filename = package.prepare.url.split("/")[-1]
                             os.chdir("_work")
         
-                            download_file(self.package.prepare.url, filename)
+                            download_file(package.prepare.url, filename)
         
                             os.system(f"tar xf {filename}")
-                            os.chdir(self.package.build.workdir)
-                            os.system(self.package.builder.build_command)
+                            os.chdir(package.build.workdir)
+                            os.system(package.builder.build_command)
+
+                        logger.routine(
+                            f"{MAGENTA}rt@build{CRESET}: Building package {package.meta.id}-{package.meta.version}"
+                        )
+                        package = package.install_pkg.makepkg()
         
-                        package = self.package.install_pkg.makepkg()
-        
-                        logger.ok(f"{MAGENTA}routines@git.build{CRESET}: Package successfully build as '{CYAN}{package}{RESET}'")"""
+                        logger.ok(f"{MAGENTA}rt@build{CRESET}: Package successfully build as '{CYAN}{package}{RESET}'")
 
             except Exception as err:
                 logger.warning(f"Client '{CYAN}{client.address}{RESET}' disconnected unexpected ({err})")
