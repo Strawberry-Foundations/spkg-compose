@@ -118,10 +118,14 @@ class BuildServer:
         
                             os.system(f"tar xf {filename}")
                             os.chdir(package.build.workdir)
+
+                            logger.routine(
+                                f"{MAGENTA}rt@build{CRESET}: Building package {package.meta.id}-{package.meta.version}"
+                            )
                             os.system(package.builder.build_command)
 
                         logger.routine(
-                            f"{MAGENTA}rt@build{CRESET}: Building package {package.meta.id}-{package.meta.version}"
+                            f"{MAGENTA}rt@build{CRESET}: Creating binpkg ..."
                         )
                         package = package.install_pkg.makepkg()
         
