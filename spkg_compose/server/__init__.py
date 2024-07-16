@@ -30,8 +30,7 @@ class Server:
         self.running_indexing = False
         self.running_gitfetch = False
 
-        self.config.get_token("primary")
-        print(args)
+        self.config.get_token("secondary")
 
     def indexing(self):
         while True:
