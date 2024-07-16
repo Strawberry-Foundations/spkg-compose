@@ -49,6 +49,10 @@ def download_file(url: str, path: str) -> None:
     open(".stop_download_progress", "a").close()
 
 
+def download_file_simple(url: str, path: str) -> None:
+    urlretrieve(url=url, filename=path)
+
+
 def _print_download_progress(file_path: Path, total_size) -> None:
     if total_size is None:
         return
