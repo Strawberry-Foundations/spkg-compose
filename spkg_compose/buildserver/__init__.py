@@ -1,6 +1,11 @@
 from spkg_compose import BUILD_SERVER_VERSION, init_dir
-from spkg_compose.buildserver import config as _cfg
+from spkg_compose.buildserver.config import config as _cfg
 from spkg_compose.cli.logger import logger
+from spkg_compose.utils.colors import *
+
+import socket
+import threading
+import sys
 
 
 class BuildServer:
@@ -9,8 +14,28 @@ class BuildServer:
         self.args = args
         self.index = f"{init_dir}/data/index.json"
 
-    def run(self):
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+    def client_thread(self):
         pass
+
+    def run(self):
+        try:
+            try:
+                self.socket.bind((self.config.address, self.config.port))
+                self.socket.listen()
+                logger.ok(f"Listening on {MAGENTA}{self.config.address}:{self.config.port}{RESET}")
+
+            except OSError:
+                logger.error(f"Address already in use ({MAGENTA}{self.config.address}:{self.config.port}{RESET})")
+                sys.exit(1)
+
+            _connection = threading.Thread(target=self.client_thread())
+            _connection.start()
+            _connection.join()
+        except KeyboardInterrupt:
+            logger.warning("spkg-compose server will be terminated")
 
 
 def build_server_main(args):
