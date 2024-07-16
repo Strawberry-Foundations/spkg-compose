@@ -15,6 +15,7 @@ import json
 import time
 import threading
 import requests
+import socket
 
 
 def calculate_percentage(total, value):
@@ -89,7 +90,8 @@ class Server:
 
                         if name not in index:
                             i += 1
-                            logger.info(f"{MAGENTA}routines@indexing{CRESET}: Found new compose package '{CYAN}{name}{CRESET}'")
+                            logger.info(
+                                f"{MAGENTA}routines@indexing{CRESET}: Found new compose package '{CYAN}{name}{CRESET}'")
                             index[name] = {
                                 'compose': file_path,
                                 'latest': '',
@@ -166,6 +168,9 @@ class Server:
         return timedelta(**kwargs)
 
     def run(self):
+        for name, value in self.config.raw['build_server'].items():
+            logger.info(f"Trying to connect to build server '{CYAN}{name}{RESET}'")
+
         i = 0
         len_routines = len(self.config.routines)
         try:
