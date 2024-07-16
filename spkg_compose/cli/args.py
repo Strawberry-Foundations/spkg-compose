@@ -22,3 +22,7 @@ class Args:
                     arguments[key] = None
             i += 1
         return arguments
+
+    def index_start(self, pos: int):
+        self.args = self.args[:pos]
+        return self
