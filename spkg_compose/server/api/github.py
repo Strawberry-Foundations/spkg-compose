@@ -46,8 +46,8 @@ class GitHubApi:
                     return 0
 
                 logger.info(f"{MAGENTA}routines@git{CRESET}: Release found for {repo}: {CYAN}{latest_release}{RESET}")
-                self.index[self.package.meta.id]["latest"] = latest_release
                 previous_version = self.index[self.package.meta.id]["latest"]
+                self.index[self.package.meta.id]["latest"] = latest_release
                 self.update(
                     release_type=GitReleaseType.RELEASE,
                     string=latest_release,
@@ -205,7 +205,10 @@ class GitHubApi:
             return False, ""
 
     def rollback(self, compose_old, specfile_old, index_version):
-        logger.warning(f"{MAGENTA}routines@git.build{CRESET}: Something went wrong - Rolling back previous changes")
+        logger.warning(
+            f"{MAGENTA}routines@git.build{CRESET}: Something went wrong - Rolling back previous changes "
+            f"({YELLOW}{index_version}{RESET}{GRAY}<-{GREEN}{self.index[self.package.meta.id]['latest']}{RESET})"
+        )
         with open(self.file_path, 'w') as file:
             file.write(compose_old)
 
