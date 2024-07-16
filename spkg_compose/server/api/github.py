@@ -229,7 +229,6 @@ class GitHubApi:
         for thread in threads:
             thread.join()
 
-        print(self.status)
         return self.status
 
     def is_buildserver_available(self, architectures):
