@@ -35,6 +35,11 @@ def calculate_percentage(total, value):
 
 
 class Server:
+    class Running:
+        def __init__(self):
+            self.index = False
+            self.git = False
+
     def __init__(self, args):
         self.routine_processes = {
             "indexing": self.indexing,
@@ -49,18 +54,17 @@ class Server:
         self.config = _cfg
         self.args = args
         self.index = f"{init_dir}/data/index.json"
-        self.running_indexing = False
-        self.running_gitfetch = False
+        self.running = Server.Running()
 
         self.config.get_token("primary")
 
     def indexing(self):
         i = 0
         while True:
-            if self.running_gitfetch:
+            if self.running.git:
                 time.sleep(1)
                 continue
-            self.running_indexing = True
+            self.running.index = True
             logger.info(f"{MAGENTA}routines@indexing{CRESET}: Starting indexing")
             if os.path.exists(self.index):
                 with open(self.index, 'r') as json_file:
@@ -91,15 +95,15 @@ class Server:
             if i == 0:
                 logger.info(f"{MAGENTA}routines@indexing{CRESET}: Nothing to do, everything up to date.")
             logger.ok(f"{MAGENTA}routines@indexing{CRESET}: Finished indexing, found {i} new packages")
-            self.running_indexing = False
+            self.running.index = False
             break
 
     def fetch_git(self):
         while True:
-            if self.running_indexing:
+            if self.running.index:
                 time.sleep(1)
                 continue
-            self.running_gitfetch = True
+            self.running.git = True
             logger.info(f"{MAGENTA}routines@git{CRESET}: Starting git fetch")
             headers = {
                 'Accept': 'application/vnd.github.v3+json',
@@ -126,7 +130,7 @@ class Server:
 
             fetch_git(self)
             logger.info(f"{MAGENTA}routines@git{CRESET}: Finished git fetch")
-            self.running_gitfetch = False
+            self.running.git = False
             break
 
     def run_routine(self, routine):
