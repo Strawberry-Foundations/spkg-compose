@@ -4,6 +4,7 @@ from spkg_compose.core.parser import read
 from spkg_compose.cli.logger import logger, current_time
 from spkg_compose.server.git import fetch_git
 from spkg_compose.utils.colors import *
+from spkg_compose.utils.time import unix_to_readable
 from spkg_compose.package import SpkgBuild
 
 from datetime import datetime, timedelta
@@ -14,7 +15,23 @@ import time
 import threading
 import requests
 
-from spkg_compose.utils.time import unix_to_readable
+
+def calculate_percentage(total, value):
+    """Calculate the percentage of value from total and return colored output."""
+    if total == 0:
+        return "Total can't be zero"
+
+    percentage = (value / total) * 100
+
+    if percentage > 60:
+        color = GREEN
+    elif percentage > 30:
+        color = YELLOW
+    else:
+        color = RED
+
+    reset_color = "\033[0m"
+    return f"{color}{value} ({percentage:.2f}%) {reset_color}"
 
 
 class Server:
@@ -22,6 +39,11 @@ class Server:
         self.routine_processes = {
             "indexing": self.indexing,
             "fetch_git": self.fetch_git
+        }
+        self.units = {
+            'h': 'hours',
+            'm': 'minutes',
+            's': 'seconds'
         }
 
         self.config = _cfg
@@ -82,8 +104,8 @@ class Server:
             rlimit_reset = result["resources"]["core"]["reset"]
 
             logger.info(
-                f"{MAGENTA}routines@fetch_git{CRESET}: {rlimit_remaining} of {rlimit_limit} requests available "
-                f"(Will reset on {unix_to_readable(rlimit_reset)})"
+                f"{MAGENTA}routines@fetch_git{CRESET}: {calculate_percentage(rlimit_limit, rlimit_remaining)}"
+                f"of {rlimit_limit} requests available (Will reset on {unix_to_readable(rlimit_reset)})"
             )
 
             if rlimit_remaining == 0:
@@ -118,14 +140,9 @@ class Server:
             time.sleep(1)
 
     def parse_interval(self, interval_str):
-        units = {
-            'h': 'hours',
-            'm': 'minutes',
-            's': 'seconds'
-        }
         amount = int(interval_str[:-1])
         unit = interval_str[-1]
-        kwargs = {units[unit]: amount}
+        kwargs = {self.units[unit]: amount}
         return timedelta(**kwargs)
 
     def run(self):
@@ -135,7 +152,10 @@ class Server:
             threads = []
             for routine in self.config.routines:
                 i += 1
-                logger.info(f"Registering routine '{CYAN}{routine['name']}{RESET}' ({i}/{len_routines})")
+                logger.info(
+                    f"Registering routine '{CYAN}{routine['name']}{RESET}' ({i}/{len_routines}), "
+                    f"runs every {GREEN}{routine['every']}{RESET}"
+                )
                 thread = threading.Thread(target=self.run_routine, args=(routine,))
                 thread.daemon = True
                 threads.append(thread)
