@@ -67,20 +67,23 @@ class BuildServerClient:
         response = message["response"]
 
         if response == "accept":
-            logger.info(f"{MAGENTA}routines@git.build{CRESET}: Server accepted build request")
+            logger.info(f"{MAGENTA}routines@git.build.{server_name}{CRESET}: Server accepted build request")
         else:
-            logger.warning(f"{MAGENTA}routines@git.build{CRESET}: Server did not accepted build request")
+            logger.warning(f"{MAGENTA}routines@git.build.{server_name}{CRESET}: Server did not accepted build request")
             return False
 
         logger.info(
-            f"{MAGENTA}routines@git.build{CRESET}: The system waits until the server has finished the build process ..."
+            f"{MAGENTA}routines@git.build.{server_name}{CRESET}: Starting build process ..."
         )
         message = self.recv()
         response = message["response"]
 
         if response == "success":
             _package = message["package_file"]
-            logger.info(f"{MAGENTA}routines@git.build{CRESET}: Package successfully build as '{CYAN}{_package}{RESET}'")
+            logger.info(
+                f"{MAGENTA}routines@git.build.{server_name}{CRESET}: Package successfully build as "
+                f"'{CYAN}{_package}{RESET}'"
+            )
             return True
         else:
             return False
