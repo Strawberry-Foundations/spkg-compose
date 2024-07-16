@@ -5,6 +5,7 @@ from enum import Enum
 
 import requests
 import json
+import yaml
 
 
 class GitReleaseType(Enum):
@@ -110,6 +111,8 @@ class GitHubApi:
             f"{MAGENTA}routines@git{CRESET}: Updating {self.repo} "
             f"({YELLOW}{self.package.meta.version}{RESET}{GRAY}->{GREEN}{version}{RESET})"
         )
+
+        # Update compose file
         with open(self.file_path, 'r') as file:
             content = file.read()
 
@@ -118,3 +121,14 @@ class GitHubApi:
         with open(self.file_path, 'w') as file:
             file.write(modified_content)
 
+        # Update specfile
+        self.update_specfile(version)
+
+    def update_specfile(self, version):
+        with open(self.index[self.package.meta.id]["specfile"], 'r') as file:
+            specfile = yaml.safe_load(file)
+
+        specfile["package"]["version"] = version
+
+        with open(self.index[self.package.meta.id]["specfile"], 'w') as file:
+            yaml.safe_dump(specfile, file, default_flow_style=False)
