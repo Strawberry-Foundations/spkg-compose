@@ -13,7 +13,7 @@ def convert_time(elapsed_time):
         time_str = f"{elapsed_time:.2f}s"
     elif elapsed_time < 3600:
         minutes, seconds = divmod(elapsed_time, 60)
-        time_str = f"{int(minutes)} m {seconds:.2f}s"
+        time_str = f"{int(minutes)}m {seconds:.2f}s"
     else:
         hours, remainder = divmod(elapsed_time, 3600)
         minutes, seconds = divmod(remainder, 60)
