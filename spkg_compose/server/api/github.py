@@ -147,8 +147,11 @@ class GitHubApi:
         specfile_old = self.update_specfile(version)
 
         # Update package
-        success = self.update_package(version, server_name)
-
+        try:
+            success = self.update_package(version, server_name)
+        except:
+            logger.error("Something went wrong while updating package")
+            success = False
         if not success:
             self.rollback(
                 compose_old=compose_old,
