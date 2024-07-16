@@ -40,7 +40,7 @@ class BuildServer:
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
         self.running = False
-        self.is_build_process = True
+        self.is_build_process = False
 
     def connection_thread(self):
         while self.running:
@@ -76,9 +76,10 @@ class BuildServer:
                         client.close()
 
                     case "request_slot":
-                        status = ""
+                        logger.info(f"Slot request from '{CYAN}{client.address}{CRESET}'")
                         if self.is_build_process:
                             status = "full"
+                            logger.warning("No available slot")
                         else:
                             status = "free"
 
