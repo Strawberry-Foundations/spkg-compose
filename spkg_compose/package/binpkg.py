@@ -46,6 +46,12 @@ class SpkgBinPkgFormat:
         if self.architecture == "%runtime_arch%":
             self.architecture = platform.machine()
 
+        if os.path.exists(f"{self.id}-{self.version}-{self.architecture}.binpkg"):
+            os.remove(f"{self.id}-{self.version}-{self.architecture}.binpkg")
+
+        if os.path.exists(f"../{self.id}-{self.version}-{self.architecture}.binpkg"):
+            os.remove(f"../{self.id}-{self.version}-{self.architecture}.binpkg")
+
         BinPkg.create(
             meta=Metadata(
                 name=self.name,
@@ -58,12 +64,6 @@ class SpkgBinPkgFormat:
             source_dir="./_binpkg",
             output_file=f"{self.id}-{self.version}-{self.architecture}.binpkg"
         )
-
-        if os.path.exists(f"{self.id}-{self.version}-{self.architecture}.binpkg"):
-            os.remove(f"{self.id}-{self.version}-{self.architecture}.binpkg")
-
-        if os.path.exists(f"../{self.id}-{self.version}-{self.architecture}.binpkg"):
-            os.remove(f"../{self.id}-{self.version}-{self.architecture}.binpkg")
 
         os.system(f"mv {self.id}-{self.version}-{self.architecture}.binpkg ..")
 
