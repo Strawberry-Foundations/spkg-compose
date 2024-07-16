@@ -10,6 +10,7 @@ import requests
 import json
 import copy
 import threading
+import time
 
 
 class GitReleaseType(Enum):
@@ -180,6 +181,7 @@ class GitHubApi:
 
     def update_package(self, version, servers):
         status = {}
+        threads = []
 
         for arch, info in servers.items():
             name = info["name"]
@@ -198,14 +200,21 @@ class GitHubApi:
             package = SpkgBuild(data)
 
             def _build():
-                _status = server.update_pkg(self, package)
+                _status = server.update_pkg(self, package, name)
                 server.disconnect()
                 status.update({
                     arch: False
                 })
 
-            thread = threading.Thread(target=_build())
+            thread = threading.Thread(target=_build)
+            thread.daemon = True
+            threads.append(thread)
             thread.start()
+
+            time.sleep(2)
+
+        for thread in threads:
+            thread.join()
 
         return False
 
