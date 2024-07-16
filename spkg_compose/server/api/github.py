@@ -46,7 +46,6 @@ class GitHubApi:
 
                 logger.info(f"{MAGENTA}routines@git{CRESET}: Release found for {repo}: {CYAN}{latest_release}{RESET}")
                 self.index[self.package.meta.id]["latest"] = latest_release
-                self.update_json()
                 self.update(GitReleaseType.RELEASE, latest_release)
             else:
                 self.fetch_commit()
@@ -73,7 +72,6 @@ class GitHubApi:
 
                 logger.info(f"{MAGENTA}routines@git{CRESET}: Latest commit for {repo}: {CYAN}{latest_commit[:7]}{RESET}")
                 self.index[self.package.meta.id]["latest"] = latest_commit
-                self.update_json()
                 self.update(GitReleaseType.COMMIT, latest_commit[:7])
         else:
             logger.error(f"Error while fetching {repo} (Status code {response.status_code})")
@@ -119,6 +117,8 @@ class GitHubApi:
         if not server_available:
             logger.warning(f"{MAGENTA}routines@git.build{CRESET}: Canceling update process")
             return 0
+
+        self.update_json()
 
         # Update compose file
         with open(self.file_path, 'r') as file:
