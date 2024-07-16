@@ -1,14 +1,21 @@
 from spkg_compose.cli.logger import logger
 from spkg_compose.utils.colors import *
 from spkg_compose.package import SpkgBuild
+from enum import Enum
 
 import requests
 import json
 
 
+class GitReleaseType(Enum):
+    COMMIT = 1
+    RELEASE = 2
+
+
 class GitHubApi:
     def __init__(self, repo_url: str, api_token: str, server, package: SpkgBuild, file_path):
         self.repo_url = repo_url
+        self.repo = ""
         self.api_token = api_token
         self.server = server
         self.package = package
@@ -25,11 +32,18 @@ class GitHubApi:
         }
         response = requests.get(api_url, headers=headers)
 
+        self.repo = repo
+
         if response.status_code == 200:
             releases = response.json()
             if releases:
                 latest_release = releases[0]
+                if self.index[self.package.meta.id]["latest"] == latest_release["tag_name"]:
+                    logger.info(f"{MAGENTA}routines@git{CRESET}: No new release for {repo} ({GREEN}{latest_release["tag_name"]}{RESET})")
+                    return 0
+
                 logger.info(f"{MAGENTA}routines@git{CRESET}: Release found for {repo}: {latest_release["tag_name"]}")
+                self.update_compose_file(GitReleaseType.RELEASE, latest_release["tag_name"])
             else:
                 self.fetch_commit()
         else:
@@ -43,13 +57,20 @@ class GitHubApi:
         }
         response = requests.get(api_url, headers=headers)
 
+        self.repo = repo
+
         if response.status_code == 200:
             commits = response.json()
             if commits:
-                latest_commit = commits[0]
-                logger.info(f"{MAGENTA}routines@git{CRESET}: Latest commit for {repo}: {latest_commit["sha"]}")
-                self.index[self.package.meta.id]["last_commit"] = latest_commit["sha"]
+                latest_commit = commits[0]["sha"]
+                if self.index[self.package.meta.id]["latest"] == latest_commit:
+                    logger.info(f"{MAGENTA}routines@git{CRESET}: No new commit for {repo} ({GREEN}{latest_commit[:7]}{RESET})")
+                    return 0
+
+                logger.info(f"{MAGENTA}routines@git{CRESET}: Latest commit for {repo}: {latest_commit[:7]}")
+                self.index[self.package.meta.id]["latest"] = latest_commit
                 self.update_json()
+                self.update_compose_file(GitReleaseType.COMMIT, latest_commit[:7])
         else:
             logger.error(f"Error while fetching {repo} (Status code {response.status_code})")
 
@@ -63,3 +84,30 @@ class GitHubApi:
     def update_json(self):
         with open(self.server.index, 'w') as json_file:
             json.dump(self.index, json_file, indent=2)
+
+    def update_compose_file(self, release_type: GitReleaseType, string):
+        version = ""
+        match release_type:
+            case GitReleaseType.COMMIT:
+                version = f"git+{string[:7]}"
+                if version == self.package.meta.version:
+                    logger.info(f"{MAGENTA}routines@git{CRESET}: No update for {self.repo} ({GREEN}{version}{RESET})")
+                    return 0
+            case GitReleaseType.RELEASE:
+                if string.startswith("v"):
+                    version = string[1:]
+                else:
+                    version = string
+                if version == self.package.meta.version:
+                    logger.info(f"{MAGENTA}routines@git{CRESET}: No update for {self.repo} ({GREEN}{version}{RESET})")
+                    return 0
+            case _:
+                logger.warning(f"{MAGENTA}routines@git{CRESET}: Invalid release type found for {self.repo} ({release_type})")
+
+        with open(self.file_path, 'r') as file:
+            content = file.read()
+
+        modified_content = content.replace(self.package.meta.version, version)
+
+        with open(self.file_path, 'w') as file:
+            file.write(modified_content)
