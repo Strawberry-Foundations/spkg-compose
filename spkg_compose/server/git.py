@@ -7,9 +7,6 @@ import json
 
 
 def fetch_git(server):
-    with open(server.index, 'r') as json_file:
-        index = json.load(json_file)
-
     for root, _, files in os.walk(server.config.data_dir):
         for file in files:
             if file.endswith('.spkg'):
