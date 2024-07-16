@@ -31,3 +31,6 @@ class BuildServerClient:
             return True
         else:
             return False
+
+    def disconnect(self):
+        self.send({"event": "disconnect"})
