@@ -20,6 +20,7 @@ def fetch_git(server):
                         repo_url=repo_url,
                         api_token=server.config.gh_token,
                         server=server,
-                        package=package
+                        package=package,
+                        file_path=file_path,
                     )
                     git.fetch()
