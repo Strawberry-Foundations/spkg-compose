@@ -138,13 +138,19 @@ class GitHubApi:
             ordered_dump(specfile, file, default_flow_style=False)
 
     def update_package(self, version):
+        available_servers = 0
         logger.info(f"{MAGENTA}routines@git.build{CRESET}: Requesting build process for {self.package.meta.id}-{version}")
         for name, value in self.server.config.raw['build_server'].items():
-            host, port = value["address"].split(":")
-            server = BuildServerClient(host, int(port))
+            server = BuildServerClient(value["address"])
             server.connect()
 
             status = server.request_slot()
+            if status == "full":
+                continue
+            available_servers += 1
+
+        if available_servers == 0:
+            logger.warning(f"{MAGENTA}routines@git.build{CRESET}: No build server is currently available")
 
         """
         logger.info(f"{MAGENTA}routines@git.build{CRESET}: Starting build process for {self.package.meta.id}-{version}")
