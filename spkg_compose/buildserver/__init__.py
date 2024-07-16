@@ -131,6 +131,8 @@ class BuildServer:
         
                         logger.ok(f"{MAGENTA}rt@build{CRESET}: Package successfully build as '{CYAN}{package}{RESET}'")
 
+                        client.send({"response": "accept", "package_file": package})
+
             except Exception as err:
                 logger.warning(f"Client '{CYAN}{client.address}{RESET}' disconnected unexpected ({err})")
                 break
