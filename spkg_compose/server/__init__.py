@@ -203,7 +203,7 @@ class Server:
 
                     elif message["response"] == "invalid_token":
                         logger.error(
-                            f"Invalid token for build server '{CYAN}{name}{RESET}'!"
+                            f"{MAGENTA}buildserver@{name}{CRESET}: Invalid token for build server '{CYAN}{name}{RESET}'!"
                         )
                         _sock.close()
                     else:
