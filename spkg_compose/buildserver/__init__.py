@@ -87,18 +87,6 @@ class BuildServer:
                 event = message["event"]
 
                 match event:
-                    case "test_connection":
-                        token = message["token"]
-                        logger.info(
-                            f"{LIGHT_BLUE}auth{RESET}: Client '{CYAN}{client.address}{CRESET}' sent "
-                            f"{GREEN}event@test_connection{RESET}"
-                        )
-
-                        if token != self.config.token:
-                            client.send({"response": "invalid_token"})
-                        else:
-                            client.send({"response": "ok", "version": BUILD_SERVER_VERSION})
-
                     case "auth":
                         token = message["token"]
                         logger.info(
