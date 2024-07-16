@@ -48,6 +48,7 @@ class GitHubApi:
                 latest_commit = commits[0]
                 logger.info(f"{MAGENTA}routines@git{CRESET}: Latest commit for {repo}: {latest_commit["sha"]}")
                 self.index[self.package.meta.id]["last_commit"] = latest_commit["sha"]
+                self.update_json()
         else:
             logger.error(f"Error while fetching {repo} (Status code {response.status_code})")
 
@@ -57,3 +58,7 @@ class GitHubApi:
         repo = parts[-1]
         api_url = f"https://api.github.com/repos/{owner}/{repo}/{endpoint}"
         return api_url, f"{owner}/{repo}"
+
+    def update_json(self):
+        with open(self.server.index, 'w') as json_file:
+            json.dump(self.index, json_file, indent=2)
