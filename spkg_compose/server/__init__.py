@@ -175,7 +175,7 @@ class Server:
             host, port = value["address"].split(":")
 
             logger.info(
-                f"{MAGENTA}builserver@{name}{CRESET}: Trying to connect to build server '{CYAN}{name}{RESET}' "
+                f"{MAGENTA}buildserver@{name}{CRESET}: Trying to connect to build server '{CYAN}{name}{RESET}' "
                 f"at {MAGENTA}{host}:{port}{RESET}"
             )
 
@@ -221,7 +221,7 @@ class Server:
 
             except Exception as err:
                 logger.error(
-                    f"{MAGENTA}builserver@{name}{CRESET}: Build server '{CYAN}{name}{RESET}' is not online! "
+                    f"{MAGENTA}buildserver@{name}{CRESET}: Build server '{CYAN}{name}{RESET}' is not online! "
                     f"Please check if the build server is running ({err})"
                 )
 
