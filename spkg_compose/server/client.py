@@ -29,6 +29,7 @@ class BuildServerClient:
 
         message = self.recv()
         response = message["response"]
+
         if response == "ok":
             logger.ok(
                 f"{MAGENTA}routines@git.build{CRESET}: Authentication successful with server "
