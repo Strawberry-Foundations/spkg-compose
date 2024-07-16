@@ -169,7 +169,7 @@ class Server:
         return timedelta(**kwargs)
 
     def run(self):
-        available_bservers = 0
+        available_servers = 0
 
         for name, value in self.config.raw['build_server'].items():
             logger.info(f"{MAGENTA}builserver@{name}{CRESET}: Trying to connect to build server '{CYAN}{name}{RESET}'")
@@ -188,7 +188,7 @@ class Server:
 
                 if message["response"]:
                     if message["response"] == "ok":
-                        available_bservers += 1
+                        available_servers += 1
                         logger.ok(
                             f"{MAGENTA}builserver@{name}{CRESET}: Successfully connected to build server "
                             f"'{CYAN}{name}{RESET}' at {MAGENTA}{host}:{port} {RESET}"
@@ -221,7 +221,7 @@ class Server:
                     f"Please check if the build server is running ({err})"
                 )
 
-        if available_bservers == 0:
+        if available_servers == 0:
             logger.error("No build server available! spkg-compose server will be terminated")
             sys.exit(1)
 
