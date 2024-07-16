@@ -37,13 +37,15 @@ class GitHubApi:
         if response.status_code == 200:
             releases = response.json()
             if releases:
-                latest_release = releases[0]
-                if self.index[self.package.meta.id]["latest"] == latest_release["tag_name"]:
-                    logger.info(f"{MAGENTA}routines@git{CRESET}: No new release for {repo} ({GREEN}{latest_release["tag_name"]}{RESET})")
+                latest_release = releases[0]["tag_name"]
+                if self.index[self.package.meta.id]["latest"] == latest_release:
+                    logger.info(f"{MAGENTA}routines@git{CRESET}: No new release for {repo} ({GREEN}{latest_release}{RESET})")
                     return 0
 
-                logger.info(f"{MAGENTA}routines@git{CRESET}: Release found for {repo}: {latest_release["tag_name"]}")
-                self.update_compose_file(GitReleaseType.RELEASE, latest_release["tag_name"])
+                logger.info(f"{MAGENTA}routines@git{CRESET}: Release found for {repo}: {CYAN}{latest_release}{RESET}")
+                self.index[self.package.meta.id]["latest"] = latest_release
+                self.update_json()
+                self.update_compose_file(GitReleaseType.RELEASE, latest_release)
             else:
                 self.fetch_commit()
         else:
@@ -67,7 +69,7 @@ class GitHubApi:
                     logger.info(f"{MAGENTA}routines@git{CRESET}: No new commit for {repo} ({GREEN}{latest_commit[:7]}{RESET})")
                     return 0
 
-                logger.info(f"{MAGENTA}routines@git{CRESET}: Latest commit for {repo}: {latest_commit[:7]}")
+                logger.info(f"{MAGENTA}routines@git{CRESET}: Latest commit for {repo}: {CYAN}{latest_commit[:7]}{RESET}")
                 self.index[self.package.meta.id]["latest"] = latest_commit
                 self.update_json()
                 self.update_compose_file(GitReleaseType.COMMIT, latest_commit[:7])
@@ -104,6 +106,10 @@ class GitHubApi:
             case _:
                 logger.warning(f"{MAGENTA}routines@git{CRESET}: Invalid release type found for {self.repo} ({release_type})")
 
+        logger.info(
+            f"{MAGENTA}routines@git{CRESET}: Updating {self.repo} "
+            f"({YELLOW}{self.package.meta.version}{RESET}{GRAY}->{GREEN}{version}{RESET})"
+        )
         with open(self.file_path, 'r') as file:
             content = file.read()
 
