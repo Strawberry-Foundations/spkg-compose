@@ -183,7 +183,7 @@ class Server:
                 _sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 _sock.connect((host, int(port)))
                 _sock.send(send_json({
-                    "event": "test_connection",
+                    "event": "auth",
                     "token": value["token"]
                 }).encode("utf8"))
 
