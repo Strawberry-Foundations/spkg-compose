@@ -172,8 +172,12 @@ class Server:
         available_servers = 0
 
         for name, value in self.config.raw['build_server'].items():
-            logger.info(f"{MAGENTA}builserver@{name}{CRESET}: Trying to connect to build server '{CYAN}{name}{RESET}'")
             host, port = value["address"].split(":")
+
+            logger.info(
+                f"{MAGENTA}builserver@{name}{CRESET}: Trying to connect to build server '{CYAN}{name}{RESET}' "
+                f"at {MAGENTA}{host}:{port}{RESET}"
+            )
 
             try:
                 _sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -191,8 +195,7 @@ class Server:
                         available_servers += 1
                         logger.ok(
                             f"{MAGENTA}builserver@{name}{CRESET}: Successfully connected to build server "
-                            f"'{CYAN}{name}{RESET}' at {MAGENTA}{host}:{port} {RESET} "
-                            f"(version {CYAN}{message['version']}{RESET})"
+                            f"'{CYAN}{name}{RESET}' (version {CYAN}{message['version']}{RESET})"
                         )
                         _sock.send(send_json({
                             "event": "disconnect",
