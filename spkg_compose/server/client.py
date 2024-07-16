@@ -1,4 +1,5 @@
 from spkg_compose.cli.logger import logger
+from spkg_compose.package import SpkgBuild
 from spkg_compose.server.json import send_json, convert_json_data
 from spkg_compose.utils.colors import *
 
@@ -36,8 +37,8 @@ class BuildServerClient:
     def disconnect(self):
         self.send({"event": "disconnect"})
 
-    def update_pkg(self, data):
-        self.send({"event": "update_pkg", "data": data.package.compose_data})
+    def update_pkg(self, data, package: SpkgBuild):
+        self.send({"event": "update_pkg", "data": package.compose_data})
 
         message = self.recv()
         response = message["response"]
