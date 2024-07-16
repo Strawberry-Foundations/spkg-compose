@@ -59,6 +59,12 @@ class SpkgBinPkgFormat:
             output_file=f"{self.id}-{self.version}-{self.architecture}.binpkg"
         )
 
+        if os.path.exists(f"{self.id}-{self.version}-{self.architecture}.binpkg"):
+            os.remove(f"{self.id}-{self.version}-{self.architecture}.binpkg")
+
+        if os.path.exists(f"../{self.id}-{self.version}-{self.architecture}.binpkg"):
+            os.remove(f"../{self.id}-{self.version}-{self.architecture}.binpkg")
+
         os.system(f"mv {self.id}-{self.version}-{self.architecture}.binpkg ..")
 
         return f"{self.id}-{self.version}-{self.architecture}.binpkg"
