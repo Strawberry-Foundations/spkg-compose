@@ -106,6 +106,7 @@ class GitHubApi:
                 version = f"git+{string[:7]}"
                 if version == self.package.meta.version:
                     logger.info(f"{MAGENTA}routines@git{CRESET}: No update for {self.repo} ({GREEN}{version}{RESET})")
+                    self.update_json()
                     return 0
             case GitReleaseType.RELEASE:
                 if string.startswith("v"):
@@ -114,6 +115,7 @@ class GitHubApi:
                     version = string
                 if version == self.package.meta.version:
                     logger.info(f"{MAGENTA}routines@git{CRESET}: No update for {self.repo} ({GREEN}{version}{RESET})")
+                    self.update_json()
                     return 0
             case _:
                 logger.warning(f"{MAGENTA}routines@git{CRESET}: Invalid release type found for {self.repo} ({release_type})")
