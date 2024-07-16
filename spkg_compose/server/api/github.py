@@ -1,4 +1,5 @@
 from spkg_compose.cli.logger import logger
+from spkg_compose.server.yaml import ordered_load, ordered_dump
 from spkg_compose.utils.colors import *
 from spkg_compose.package import SpkgBuild
 from enum import Enum
@@ -46,7 +47,7 @@ class GitHubApi:
                 logger.info(f"{MAGENTA}routines@git{CRESET}: Release found for {repo}: {CYAN}{latest_release}{RESET}")
                 self.index[self.package.meta.id]["latest"] = latest_release
                 self.update_json()
-                self.update_package_files(GitReleaseType.RELEASE, latest_release)
+                self.update(GitReleaseType.RELEASE, latest_release)
             else:
                 self.fetch_commit()
         else:
@@ -73,7 +74,7 @@ class GitHubApi:
                 logger.info(f"{MAGENTA}routines@git{CRESET}: Latest commit for {repo}: {CYAN}{latest_commit[:7]}{RESET}")
                 self.index[self.package.meta.id]["latest"] = latest_commit
                 self.update_json()
-                self.update_package_files(GitReleaseType.COMMIT, latest_commit[:7])
+                self.update(GitReleaseType.COMMIT, latest_commit[:7])
         else:
             logger.error(f"Error while fetching {repo} (Status code {response.status_code})")
 
@@ -88,7 +89,7 @@ class GitHubApi:
         with open(self.server.index, 'w') as json_file:
             json.dump(self.index, json_file, indent=2)
 
-    def update_package_files(self, release_type: GitReleaseType, string):
+    def update(self, release_type: GitReleaseType, string):
         version = ""
         match release_type:
             case GitReleaseType.COMMIT:
@@ -124,11 +125,17 @@ class GitHubApi:
         # Update specfile
         self.update_specfile(version)
 
+        # Update package
+        self.update_package(version)
+
     def update_specfile(self, version):
         with open(self.index[self.package.meta.id]["specfile"], 'r') as file:
-            specfile = yaml.safe_load(file)
+            specfile = ordered_load(file)
 
         specfile["package"]["version"] = version
 
         with open(self.index[self.package.meta.id]["specfile"], 'w') as file:
-            yaml.safe_dump(specfile, file, default_flow_style=False)
+            ordered_dump(specfile, file, default_flow_style=False)
+
+    def update_package(self, version):
+        pass
