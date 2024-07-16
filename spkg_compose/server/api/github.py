@@ -186,7 +186,7 @@ class GitHubApi:
         for arch, info in servers.items():
             name = info["name"]
             logger.info(
-                f"{MAGENTA}routines@git.build{CRESET}: Requesting build process on server '{CYAN}{name}{RESET}' "
+                f"{MAGENTA}routines@git.build.{name}{CRESET}: Requesting build process on server '{CYAN}{name}{RESET}' "
                 f"for arch '{CYAN}{arch}{RESET}' for package {GREEN}{self.package.meta.id}-{version}{RESET}"
             )
             server = BuildServerClient(self.server.config.raw['build_server'][name]["address"])
