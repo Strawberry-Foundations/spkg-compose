@@ -55,6 +55,7 @@ class Server:
         self.config.get_token("secondary")
 
     def indexing(self):
+        i = 0
         while True:
             if self.running_gitfetch:
                 time.sleep(1)
@@ -77,7 +78,8 @@ class Server:
                         name = package.meta.id
 
                         if name not in index:
-                            logger.info(f"Found new compose package '{CYAN}{name}{CRESET}'")
+                            i += 1
+                            logger.info(f"{MAGENTA}routines@indexing{CRESET}: Found new compose package '{CYAN}{name}{CRESET}'")
                             index[name] = {
                                 'compose': file_path,
                                 'last_commit': '',
@@ -86,7 +88,9 @@ class Server:
 
             with open(self.index, 'w') as json_file:
                 json.dump(index, json_file, indent=2)
-            logger.ok(f"{MAGENTA}routines@indexing{CRESET}: Finished indexing")
+            if i == 0:
+                logger.info(f"{MAGENTA}routines@indexing{CRESET}: Nothing to do, everything up to date.")
+            logger.ok(f"{MAGENTA}routines@indexing{CRESET}: Finished indexing, found {i} new packages")
             self.running_indexing = False
             break
 
