@@ -5,8 +5,31 @@ from spkg_compose.utils.colors import *
 import yaml
 import sys
 
-with open(init_dir + "/data/config.yml", "r") as _config:
-    config_data = yaml.load(_config, Loader=yaml.SafeLoader)
+DEFAULT_CONFIG = """
+server:
+  data_dir: /path/to/your/repo
+
+routines:
+  - name: index
+    process: indexing
+    every: 30m
+  - name: fetch-git
+    process: git
+    every: 15m
+
+github:
+  tokens:
+    primary:
+      token: your_gh_token
+"""
+
+try:
+    with open(init_dir + "/data/config.yml", "r") as _config:
+        config_data = yaml.load(_config, Loader=yaml.SafeLoader)
+except FileNotFoundError:
+    logger.warning("Configuration file does not exist. Creating a new one...")
+    with open(init_dir + "/data/config.yml", "w") as _config:
+        _config.write(DEFAULT_CONFIG)
 
 
 class Config:
