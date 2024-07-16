@@ -1,5 +1,5 @@
+from spkg_compose.server.client import BuildServerClient
 from spkg_compose.server.yaml import ordered_load, ordered_dump
-from spkg_compose.cli.build import download_file
 from spkg_compose.cli.logger import logger
 from spkg_compose.utils.colors import *
 from spkg_compose.package import SpkgBuild
@@ -7,8 +7,6 @@ from enum import Enum
 
 import requests
 import json
-import os
-import shutil
 
 
 class GitReleaseType(Enum):
@@ -140,7 +138,14 @@ class GitHubApi:
             ordered_dump(specfile, file, default_flow_style=False)
 
     def update_package(self, version):
-        logger.info(f"{MAGENTA}routines@git.build{CRESET}: Starting build process for {self.package.meta.id}-{version}")
+        logger.info(f"{MAGENTA}routines@git.build{CRESET}: Requesting build process for {self.package.meta.id}-{version}")
+        for name, value in self.server.config.raw['build_server'].items():
+            host, port = value["address"].split(":")
+            server = BuildServerClient(host, int(port))
+            server.connect()
+
+            status = server.request_slot()
+
         """
         logger.info(f"{MAGENTA}routines@git.build{CRESET}: Starting build process for {self.package.meta.id}-{version}")
 
