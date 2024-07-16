@@ -3,7 +3,6 @@ from spkg_compose.server.api.github import GitHubApi
 from spkg_compose.package import SpkgBuild
 
 import os
-import json
 
 
 def fetch_git(server):
