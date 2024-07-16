@@ -45,7 +45,7 @@ class GitHubApi:
                 logger.info(f"{MAGENTA}routines@git{CRESET}: Release found for {repo}: {CYAN}{latest_release}{RESET}")
                 self.index[self.package.meta.id]["latest"] = latest_release
                 self.update_json()
-                self.update_compose_file(GitReleaseType.RELEASE, latest_release)
+                self.update_package_files(GitReleaseType.RELEASE, latest_release)
             else:
                 self.fetch_commit()
         else:
@@ -72,7 +72,7 @@ class GitHubApi:
                 logger.info(f"{MAGENTA}routines@git{CRESET}: Latest commit for {repo}: {CYAN}{latest_commit[:7]}{RESET}")
                 self.index[self.package.meta.id]["latest"] = latest_commit
                 self.update_json()
-                self.update_compose_file(GitReleaseType.COMMIT, latest_commit[:7])
+                self.update_package_files(GitReleaseType.COMMIT, latest_commit[:7])
         else:
             logger.error(f"Error while fetching {repo} (Status code {response.status_code})")
 
@@ -87,7 +87,7 @@ class GitHubApi:
         with open(self.server.index, 'w') as json_file:
             json.dump(self.index, json_file, indent=2)
 
-    def update_compose_file(self, release_type: GitReleaseType, string):
+    def update_package_files(self, release_type: GitReleaseType, string):
         version = ""
         match release_type:
             case GitReleaseType.COMMIT:
@@ -117,3 +117,4 @@ class GitHubApi:
 
         with open(self.file_path, 'w') as file:
             file.write(modified_content)
+
