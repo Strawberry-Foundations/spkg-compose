@@ -28,7 +28,7 @@ class GitHubApi:
             releases = response.json()
             if releases:
                 latest_release = releases[0]
-                logger.info(f"{MAGENTA}routines@git{CRESET}: Release found for {repo}: {latest_release['tag_name']}")
+                logger.info(f"{MAGENTA}routines@git{CRESET}: Release found for {repo}: {latest_release["tag_name"]}")
             else:
                 self.fetch_commit()
         else:
@@ -37,8 +37,8 @@ class GitHubApi:
     def fetch_commit(self):
         api_url, repo = self.to_gh_api_url("commits")
         headers = {
-            'Accept': 'application/vnd.github.v3+json',
-            'Authorization': f'Bearer {self.api_token}'
+            "Accept": "application/vnd.github.v3+json",
+            "Authorization": f"Bearer {self.api_token}"
         }
         response = requests.get(api_url, headers=headers)
 
@@ -46,7 +46,8 @@ class GitHubApi:
             commits = response.json()
             if commits:
                 latest_commit = commits[0]
-                logger.info(f"{MAGENTA}routines@git{CRESET}: Latest commit for {repo}: {latest_commit['sha']}")
+                logger.info(f"{MAGENTA}routines@git{CRESET}: Latest commit for {repo}: {latest_commit["sha"]}")
+                self.index[self.package.meta.id]["last_commit"] = latest_commit["sha"]
         else:
             logger.error(f"Error while fetching {repo} (Status code {response.status_code})")
 
