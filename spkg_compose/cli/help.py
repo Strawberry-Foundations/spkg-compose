@@ -8,7 +8,8 @@ def help_cmd():
 {GREEN}{BOLD}Usage:{RESET} {WHITE}spkg-compose {CYAN}[command] {RED}[<options>]{CRESET}\n\n\
 {MAGENTA}{BOLD}Commands:{CRESET}
     {CYAN}{BOLD}build {RED}<composefile>:{CRESET} Builds a package by using the given compose file
-    {CYAN}{BOLD}server:{CRESET} Starts a local spkg build server
+    {CYAN}{BOLD}server:{CRESET} Starts a local spkg-compose server
+    {CYAN}{BOLD}build-server:{CRESET} Starts a local spkg build server
     """)
 
 
