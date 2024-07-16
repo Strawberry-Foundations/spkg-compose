@@ -53,7 +53,7 @@ class BuildServer:
             connection.start()
             connection.join()
         except KeyboardInterrupt:
-            logger.warning("spkg-compose server will be terminated")
+            logger.warning("spkg-compose build server will be terminated")
 
 
 def build_server_main(args):
