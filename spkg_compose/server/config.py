@@ -5,8 +5,7 @@ from spkg_compose.utils.colors import *
 import yaml
 import sys
 
-DEFAULT_CONFIG = """
-server:
+DEFAULT_CONFIG = """server:
   data_dir: /path/to/your/repo
 
 routines:
@@ -30,6 +29,8 @@ except FileNotFoundError:
     logger.warning("Configuration file does not exist. Creating a new one...")
     with open(init_dir + "/data/config.yml", "w") as _config:
         _config.write(DEFAULT_CONFIG)
+    logger.info("Config file created. Please adjust the configuration according to your wishes and then restart the server. ")
+    sys.exit(0)
 
 
 class Config:
