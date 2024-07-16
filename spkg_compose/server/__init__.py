@@ -17,6 +17,7 @@ import time
 import threading
 import requests
 import socket
+import yaml
 
 
 def calculate_percentage(total, value):
@@ -59,7 +60,7 @@ class Server:
         self.index = f"{init_dir}/data/index.json"
         self.running = Server.Running()
 
-        if 'token' in self.args.options:
+        if "token" in self.args.options:
             try:
                 self.config.set_token(self.args.options["token"])
             except KeyError:
@@ -75,14 +76,14 @@ class Server:
             self.running.index = True
             logger.info(f"{MAGENTA}routines@indexing{CRESET}: Starting indexing")
             if os.path.exists(self.index):
-                with open(self.index, 'r') as json_file:
+                with open(self.index, "r") as json_file:
                     index = json.load(json_file)
             else:
                 index = {}
 
             for root, _, files in os.walk(self.config.data_dir):
                 for file in files:
-                    if file.endswith('.spkg'):
+                    if file.endswith(".spkg"):
                         file_path = os.path.join(root, file)
 
                         data = read(file_path)
@@ -92,11 +93,22 @@ class Server:
                         if name not in index:
                             i += 1
                             logger.info(
-                                f"{MAGENTA}routines@indexing{CRESET}: Found new compose package '{CYAN}{name}{CRESET}'")
+                                f"{MAGENTA}routines@indexing{CRESET}: Found new compose package '{CYAN}{name}{CRESET}'"
+                            )
+                            specfile_path = file_path.replace("/compose.spkg", "/specfile.yml")
+
+                            with open(specfile_path, "r") as _config:
+                                specfile_data = yaml.load(_config, Loader=yaml.SafeLoader)
+
+                            architectures = []
+                            for arch, _ in specfile_data["binpkg"].items():
+                                architectures.append(arch)
+
                             index[name] = {
-                                'compose': file_path,
-                                'latest': '',
-                                'specfile': file_path.replace("/compose.spkg", "/specfile.yml")
+                                "compose": file_path,
+                                "latest": "",
+                                "architectures": architectures,
+                                "specfile": specfile_path
                             }
 
             with open(self.index, 'w') as json_file:
