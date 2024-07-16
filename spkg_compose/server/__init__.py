@@ -170,6 +170,18 @@ class Server:
     def run(self):
         for name, value in self.config.raw['build_server'].items():
             logger.info(f"Trying to connect to build server '{CYAN}{name}{RESET}'")
+            host, port = value["address"].split(":")
+
+            try:
+                _sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                _sock.connect((host, int(port)))
+                logger.ok(
+                    f"Successfully connected to build server '{CYAN}{name}{RESET}' at {MAGENTA}{host}:{port} {RESET}"
+                )
+            except Exception as err:
+                logger.error(
+                    f"Build server '{CYAN}{name}{RESET}' is not online! Please check if the build server is running ({err})"
+                )
 
         i = 0
         len_routines = len(self.config.routines)
