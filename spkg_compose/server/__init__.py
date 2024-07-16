@@ -82,7 +82,7 @@ class Server:
                             logger.info(f"{MAGENTA}routines@indexing{CRESET}: Found new compose package '{CYAN}{name}{CRESET}'")
                             index[name] = {
                                 'compose': file_path,
-                                'last_commit': '',
+                                'latest': '',
                                 'specfile': file_path.replace("/compose.spkg", "/specfile.yml")
                             }
 
