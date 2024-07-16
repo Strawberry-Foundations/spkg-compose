@@ -179,7 +179,7 @@ class GitHubApi:
         data = read(self.file_path)
         package = SpkgBuild(data)
 
-        status = server.update_pkg(package)
+        status = server.update_pkg(self, package)
         server.disconnect()
 
         return status
