@@ -1,4 +1,4 @@
-from spkg_compose import SERVER_VERSION, init_dir
+from spkg_compose import BUILD_SERVER_VERSION, init_dir
 from spkg_compose.buildserver import config as _cfg
 from spkg_compose.cli.logger import logger
 
@@ -14,7 +14,7 @@ class BuildServer:
 
 
 def build_server_main(args):
-    logger.default(f"Starting spkg-compose build server v{SERVER_VERSION}")
+    logger.default(f"Starting spkg-compose build server v{BUILD_SERVER_VERSION}")
 
     server = BuildServer(args)
     server.run()
