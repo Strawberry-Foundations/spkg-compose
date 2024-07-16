@@ -150,8 +150,9 @@ class GitHubApi:
         try:
             success = self.update_package(version, server_name)
         except:
-            logger.error("Something went wrong while updating package")
+            logger.error(f"{MAGENTA}routines@git.build{CRESET}: Something went wrong while updating package")
             success = False
+
         if not success:
             self.rollback(
                 compose_old=compose_old,

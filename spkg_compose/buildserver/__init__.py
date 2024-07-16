@@ -69,12 +69,28 @@ class BuildServer:
                 match event:
                     case "test_connection":
                         token = message["token"]
-                        logger.info(f"Client '{CYAN}{client.address}{CRESET}' sent {GREEN}event@test_connection{RESET}")
+                        logger.info(
+                            f"{LIGHT_BLUE}auth{RESET}: Client '{CYAN}{client.address}{CRESET}' sent "
+                            f"{GREEN}event@test_connection{RESET}"
+                        )
 
                         if token != self.config.token:
                             client.send({"response": "invalid_token"})
                         else:
                             client.send({"response": "ok"})
+
+                    case "auth":
+                        token = message["token"]
+                        logger.info(
+                            f"{LIGHT_BLUE}auth{RESET}: Client '{CYAN}{client.address}{CRESET}' authenticated with token"
+                        )
+
+                        if token != self.config.token:
+                            client.send({"response": "invalid_token"})
+                            logger.warning(f"{LIGHT_BLUE}auth{RESET}: Invalid token from '{CYAN}{client.address}{CRESET}'")
+                        else:
+                            client.send({"response": "ok"})
+                            logger.ok(f"{LIGHT_BLUE}auth{RESET}: Token is valid")
 
                     case "disconnect":
                         client.close()
@@ -103,7 +119,7 @@ class BuildServer:
                             f"{MAGENTA}rt@build{CRESET}: Preparing build process for "
                             f"{package.meta.id}-{package.meta.version}"
                         )
-        
+
                         try:
                             os.mkdir("_work")
                         except FileExistsError:
@@ -130,10 +146,9 @@ class BuildServer:
                         package = package.install_pkg.makepkg()
         
                         logger.ok(f"{MAGENTA}rt@build{CRESET}: Package successfully build as '{CYAN}{package}{RESET}'")
-
                         client.send({"response": "success", "package_file": package})
 
-            except Exception as err:
+            except KeyError as err:
                 logger.warning(f"Client '{CYAN}{client.address}{RESET}' disconnected unexpected ({err})")
                 break
 
