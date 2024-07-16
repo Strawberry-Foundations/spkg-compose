@@ -113,6 +113,13 @@ class GitHubApi:
             f"({YELLOW}{self.package.meta.version}{RESET}{GRAY}->{GREEN}{version}{RESET})"
         )
 
+        # Check if build server is availabe
+        server_available, server_name = self.is_buildserver_available()
+
+        if not server_available:
+            logger.warning(f"{MAGENTA}routines@git.build{CRESET}: Canceling update process")
+            return 0
+
         # Update compose file
         with open(self.file_path, 'r') as file:
             content = file.read()
@@ -138,19 +145,27 @@ class GitHubApi:
             ordered_dump(specfile, file, default_flow_style=False)
 
     def update_package(self, version):
-        available_servers = 0
         logger.info(f"{MAGENTA}routines@git.build{CRESET}: Requesting build process for {self.package.meta.id}-{version}")
+
+    def is_buildserver_available(self):
+        available_servers = 0
+        logger.info(f"{MAGENTA}routines@git.build{CRESET}: Checking whether a build server is available")
         for name, value in self.server.config.raw['build_server'].items():
             server = BuildServerClient(value["address"])
             server.connect()
 
             status = server.request_slot()
-            if status == "full":
+            if not status:
+                logger.warning(f"{MAGENTA}routines@git.build{CRESET}: Server '{CYAN}{name}{RESET}' is full")
+                server.disconnect()
                 continue
-            available_servers += 1
+            else:
+                server.disconnect()
+                return True, name
 
         if available_servers == 0:
             logger.warning(f"{MAGENTA}routines@git.build{CRESET}: No build server is currently available")
+            return False, ""
 
         """
         logger.info(f"{MAGENTA}routines@git.build{CRESET}: Starting build process for {self.package.meta.id}-{version}")
