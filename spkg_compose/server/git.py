@@ -22,6 +22,7 @@ def fetch_git(server):
                 if repo_url.startswith("https://github.com"):
                     git = GitHubApi(
                         repo_url=repo_url,
-                        api_token=server.config.gh_token
+                        api_token=server.config.gh_token,
+                        server=server
                     )
                     git.fetch()
