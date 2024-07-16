@@ -44,7 +44,7 @@ class Config:
             logger.error(f"Invalid configuration! Please check your configuration file. (Missing key: {err})")
             sys.exit(1)
 
-    def get_token(self, token_id: str):
+    def set_token(self, token_id: str):
         self.gh_token = config_data["github"]["tokens"][token_id]["token"]
         logger.info(f"{LIGHT_BLUE}git{RESET}: Using the '{CYAN}{token_id}{RESET}' token as the main token")
         return self.gh_token
