@@ -1,12 +1,14 @@
-from spkg_compose.cli.logger import logger
 from spkg_compose.server.yaml import ordered_load, ordered_dump
+from spkg_compose.cli.build import download_file
+from spkg_compose.cli.logger import logger
 from spkg_compose.utils.colors import *
 from spkg_compose.package import SpkgBuild
 from enum import Enum
 
 import requests
 import json
-import yaml
+import os
+import shutil
 
 
 class GitReleaseType(Enum):
@@ -138,4 +140,24 @@ class GitHubApi:
             ordered_dump(specfile, file, default_flow_style=False)
 
     def update_package(self, version):
-        pass
+        logger.info(f"{MAGENTA}routines@git.build{CRESET}: Starting build process for {self.package.meta.id}-{version}")
+
+        try:
+            os.mkdir("_work")
+        except FileExistsError:
+            shutil.rmtree("_work")
+            os.mkdir("_work")
+
+        if self.package.prepare.type == "Archive":
+            filename = self.package.prepare.url.split("/")[-1]
+            os.chdir("_work")
+
+            download_file(self.package.prepare.url, filename)
+
+            os.system(f"tar xf {filename}")
+            os.chdir(self.package.build.workdir)
+            os.system(self.package.builder.build_command)
+
+        package = self.package.install_pkg.makepkg()
+
+        logger.ok(f"{MAGENTA}routines@git.build{CRESET}: Package successfully build as '{CYAN}{package}{RESET}'")
