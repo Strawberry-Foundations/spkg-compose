@@ -178,6 +178,8 @@ class GitHubApi:
         return specfile_old
 
     def update_package(self, version, servers):
+        status = {}
+
         for arch, info in servers.items():
             name = info["name"]
             logger.info(
@@ -197,6 +199,9 @@ class GitHubApi:
             status = server.update_pkg(self, package)
             server.disconnect()
 
+            status.update({
+                arch: False
+            })
             return False
 
     def is_buildserver_available(self, architectures):
