@@ -29,7 +29,7 @@ try:
 except FileNotFoundError:
     logger.warning("Configuration file does not exist. Creating a new one...")
     with open(init_dir + "/data/buildserver.yml", "w") as _config:
-        _config.write(DEFAULT_CONFIG.replace("sf_spc_some_random_token", generate_token()))
+        _config.write(DEFAULT_CONFIG.replace("sf_spc_some_random_token", f"sf_spc_{generate_token()}"))
     logger.ok(f"Config file created ({GREEN}{init_dir}/data/buildserver.yml{RESET}).")
     logger.info("Please adjust the configuration according to your wishes and then restart the server.")
     sys.exit(0)
