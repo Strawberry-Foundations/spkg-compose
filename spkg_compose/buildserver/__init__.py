@@ -1,6 +1,7 @@
 from spkg_compose import BUILD_SERVER_VERSION, init_dir
 from spkg_compose.buildserver.config import config as _cfg
 from spkg_compose.cli.logger import logger
+from spkg_compose.package import SpkgBuild
 from spkg_compose.server import convert_json_data, send_json
 from spkg_compose.utils.colors import *
 
@@ -84,6 +85,37 @@ class BuildServer:
                             status = "free"
 
                         client.send({"response": status})
+
+                    case "update_pkg":
+                        package = SpkgBuild(message["data"])
+                        logger.info(
+                            f"Build request from '{CYAN}{client.address}{CRESET}' for package "
+                            f"'{GREEN}{package.meta.id}{RESET}', version {CYAN}{package.meta.version}{RESET}"
+                        )
+                        client.send({"response": "accept"})
+
+                        """
+                        logger.info(f"{MAGENTA}routines@git.build{CRESET}: Starting build process for {self.package.meta.id}-{version}")
+        
+                        try:
+                            os.mkdir("_work")
+                        except FileExistsError:
+                            shutil.rmtree("_work")
+                            os.mkdir("_work")
+        
+                        if self.package.prepare.type == "Archive":
+                            filename = self.package.prepare.url.split("/")[-1]
+                            os.chdir("_work")
+        
+                            download_file(self.package.prepare.url, filename)
+        
+                            os.system(f"tar xf {filename}")
+                            os.chdir(self.package.build.workdir)
+                            os.system(self.package.builder.build_command)
+        
+                        package = self.package.install_pkg.makepkg()
+        
+                        logger.ok(f"{MAGENTA}routines@git.build{CRESET}: Package successfully build as '{CYAN}{package}{RESET}'")"""
 
             except Exception as err:
                 logger.warning(f"Client '{CYAN}{client.address}{RESET}' disconnected unexpected ({err})")
