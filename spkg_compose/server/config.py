@@ -8,6 +8,13 @@ import sys
 DEFAULT_CONFIG = """server:
   data_dir: /path/to/your/repo
 
+build_server:
+  main:
+    name: My build server
+    tags: [x86_64, linux]
+    address: 127.0.0.1:3086
+    token: insert_token_here
+    
 routines:
   - name: index
     process: indexing
