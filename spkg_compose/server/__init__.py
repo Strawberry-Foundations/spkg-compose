@@ -193,20 +193,27 @@ class Server:
                             f"{MAGENTA}builserver@{name}{CRESET}: Successfully connected to build server "
                             f"'{CYAN}{name}{RESET}' at {MAGENTA}{host}:{port} {RESET}"
                         )
+                        _sock.send(send_json({
+                            "event": "disconnect",
+                        }).encode("utf8"))
+
                     elif message["response"] == "invalid_token":
                         logger.error(
                             f"Invalid token for build server '{CYAN}{name}{RESET}'!"
                         )
+                        _sock.close()
                     else:
                         logger.error(
                             f"{MAGENTA}builserver@{name}{CRESET}: Build server '{CYAN}{name}{RESET}' "
                             f"did not send a valid response! ({message['response']})"
                         )
+                        _sock.close()
                 else:
                     logger.error(
                         f"{MAGENTA}builserver@{name}{CRESET}: Build server '{CYAN}{name}{RESET}' "
                         f"did not send a valid response! ({message})"
                     )
+                    _sock.close()
 
             except Exception as err:
                 logger.error(
