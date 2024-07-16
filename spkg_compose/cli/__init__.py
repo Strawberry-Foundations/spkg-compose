@@ -18,7 +18,7 @@ match args.args[1]:
     case "help":
         help_cmd()
     case "server":
-        server_main(args.args[:3])
+        server_main(args.args[2:])
     case "build":
         if len(args.args) < 3:
             print(f"{BACK_RED}  ERROR  {BACK_RESET}  Missing compose file!")
