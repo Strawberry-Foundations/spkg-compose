@@ -6,6 +6,7 @@ from spkg_compose.server import server_main
 from spkg_compose.utils.colors import *
 
 args = Args()
+args.parse_args()
 
 try:
     command = args.get(1)
@@ -18,7 +19,7 @@ match args.args[1]:
     case "help":
         help_cmd()
     case "server":
-        server_main(args.args[2:])
+        server_main(args.index_start(2))
     case "build":
         if len(args.args) < 3:
             print(f"{BACK_RED}  ERROR  {BACK_RESET}  Missing compose file!")
