@@ -1,3 +1,4 @@
+from spkg_compose.core.parser import read
 from spkg_compose.server.client import BuildServerClient
 from spkg_compose.server.yaml import ordered_load, ordered_dump
 from spkg_compose.cli.logger import logger
@@ -46,7 +47,12 @@ class GitHubApi:
 
                 logger.info(f"{MAGENTA}routines@git{CRESET}: Release found for {repo}: {CYAN}{latest_release}{RESET}")
                 self.index[self.package.meta.id]["latest"] = latest_release
-                self.update(GitReleaseType.RELEASE, latest_release)
+                previous_version = self.index[self.package.meta.id]["latest"]
+                self.update(
+                    release_type=GitReleaseType.RELEASE,
+                    string=latest_release,
+                    previous_index_version=previous_version
+                )
             else:
                 self.fetch_commit()
         else:
@@ -71,8 +77,13 @@ class GitHubApi:
                     return 0
 
                 logger.info(f"{MAGENTA}routines@git{CRESET}: Latest commit for {repo}: {CYAN}{latest_commit[:7]}{RESET}")
+                previous_version = self.index[self.package.meta.id]["latest"]
                 self.index[self.package.meta.id]["latest"] = latest_commit
-                self.update(GitReleaseType.COMMIT, latest_commit[:7])
+                self.update(
+                    release_type=GitReleaseType.COMMIT,
+                    string=latest_commit[:7],
+                    previous_index_version=previous_version
+                )
         else:
             logger.error(f"Error while fetching {repo} (Status code {response.status_code})")
 
@@ -87,7 +98,7 @@ class GitHubApi:
         with open(self.server.index, 'w') as json_file:
             json.dump(self.index, json_file, indent=2)
 
-    def update(self, release_type: GitReleaseType, string):
+    def update(self, release_type: GitReleaseType, string, previous_index_version):
         version = ""
         match release_type:
             case GitReleaseType.COMMIT:
@@ -111,7 +122,7 @@ class GitHubApi:
             f"({YELLOW}{self.package.meta.version}{RESET}{GRAY}->{GREEN}{version}{RESET})"
         )
 
-        # Check if build server is availabe
+        # Check if build server is available
         server_available, server_name = self.is_buildserver_available()
 
         if not server_available:
@@ -120,9 +131,11 @@ class GitHubApi:
 
         self.update_json()
 
-        # Update compose file
+        # Update compose filedata
         with open(self.file_path, 'r') as file:
             content = file.read()
+
+        compose_old = content
 
         modified_content = content.replace(self.package.meta.version, version)
 
@@ -130,19 +143,30 @@ class GitHubApi:
             file.write(modified_content)
 
         # Update specfile
-        self.update_specfile(version)
+        specfile_old = self.update_specfile(version)
 
         # Update package
-        self.update_package(version, server_name)
+        success = self.update_package(version, server_name)
+
+        if not success:
+            self.rollback(
+                compose_old=compose_old,
+                specfile_old=specfile_old,
+                index_version=previous_index_version
+            )
 
     def update_specfile(self, version):
         with open(self.index[self.package.meta.id]["specfile"], 'r') as file:
             specfile = ordered_load(file)
 
+        specfile_old = specfile
+
         specfile["package"]["version"] = version
 
         with open(self.index[self.package.meta.id]["specfile"], 'w') as file:
             ordered_dump(specfile, file, default_flow_style=False)
+
+        return specfile_old
 
     def update_package(self, version, server_name):
         logger.info(
@@ -151,6 +175,14 @@ class GitHubApi:
         )
         server = BuildServerClient(self.server.config.raw['build_server'][server_name]["address"])
         server.connect()
+
+        data = read(self.file_path)
+        package = SpkgBuild(data)
+
+        status = server.update_pkg(package)
+        server.disconnect()
+
+        return status
 
     def is_buildserver_available(self):
         available_servers = 0
@@ -172,25 +204,13 @@ class GitHubApi:
             logger.warning(f"{MAGENTA}routines@git.build{CRESET}: No build server is currently available")
             return False, ""
 
-        """
-        logger.info(f"{MAGENTA}routines@git.build{CRESET}: Starting build process for {self.package.meta.id}-{version}")
+    def rollback(self, compose_old, specfile_old, index_version):
+        logger.warning(f"{MAGENTA}routines@git.build{CRESET}: Rolling back previous changes")
+        with open(self.file_path, 'w') as file:
+            file.write(compose_old)
 
-        try:
-            os.mkdir("_work")
-        except FileExistsError:
-            shutil.rmtree("_work")
-            os.mkdir("_work")
+        with open(self.index[self.package.meta.id]["specfile"], 'w') as file:
+            ordered_dump(specfile_old, file, default_flow_style=False)
 
-        if self.package.prepare.type == "Archive":
-            filename = self.package.prepare.url.split("/")[-1]
-            os.chdir("_work")
-
-            download_file(self.package.prepare.url, filename)
-
-            os.system(f"tar xf {filename}")
-            os.chdir(self.package.build.workdir)
-            os.system(self.package.builder.build_command)
-
-        package = self.package.install_pkg.makepkg()
-
-        logger.ok(f"{MAGENTA}routines@git.build{CRESET}: Package successfully build as '{CYAN}{package}{RESET}'")"""
+        self.index[self.package.meta.id]["latest"] = index_version
+        self.update_json()
