@@ -97,7 +97,7 @@ class BuildServer:
                         if token != self.config.token:
                             client.send({"response": "invalid_token"})
                         else:
-                            client.send({"response": "ok"})
+                            client.send({"response": "ok", "version": BUILD_SERVER_VERSION})
 
                     case "auth":
                         token = message["token"]
