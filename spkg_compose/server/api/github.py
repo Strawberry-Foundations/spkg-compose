@@ -207,7 +207,8 @@ class GitHubApi:
     def rollback(self, compose_old, specfile_old, index_version):
         logger.warning(
             f"{MAGENTA}routines@git.build{CRESET}: Something went wrong - Rolling back previous changes "
-            f"({GREEN}{self.index[self.package.meta.id]['latest']}{RESET}{GRAY}->{YELLOW}{index_version}{RESET})"
+            f"({GREEN}{self.index[self.package.meta.id]['latest'].replace('v', '')}{RESET}{GRAY}->"
+            f"{YELLOW}{index_version.replace('v', '')}{RESET})"
         )
         with open(self.file_path, 'w') as file:
             file.write(compose_old)
