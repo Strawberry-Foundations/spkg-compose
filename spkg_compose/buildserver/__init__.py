@@ -1,5 +1,3 @@
-import json.decoder
-
 from spkg_compose import BUILD_SERVER_VERSION, init_dir
 from spkg_compose.buildserver.config import config as _cfg
 from spkg_compose.cli.build import download_file
@@ -13,6 +11,8 @@ import threading
 import sys
 import os
 import shutil
+import json.decoder
+import platform
 
 addresses = {}
 authenticated = {}
@@ -105,7 +105,11 @@ class BuildServer:
                             logger.warning(f"{LIGHT_BLUE}auth{RESET}: Invalid token from '{CYAN}{client.address}{CRESET}'")
                             client.close()
                         else:
-                            client.send({"response": "ok", "version": BUILD_SERVER_VERSION})
+                            client.send({
+                                "response": "ok",
+                                "version": BUILD_SERVER_VERSION,
+                                "architecture": platform.machine()
+                            })
                             logger.ok(f"{LIGHT_BLUE}auth{RESET}: Token is valid")
                             authenticated[client] = True
 
