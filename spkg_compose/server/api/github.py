@@ -133,7 +133,7 @@ class GitHubApi:
         self.update_specfile(version)
 
         # Update package
-        self.update_package(version)
+        self.update_package(version, server_name)
 
     def update_specfile(self, version):
         with open(self.index[self.package.meta.id]["specfile"], 'r') as file:
@@ -144,8 +144,13 @@ class GitHubApi:
         with open(self.index[self.package.meta.id]["specfile"], 'w') as file:
             ordered_dump(specfile, file, default_flow_style=False)
 
-    def update_package(self, version):
-        logger.info(f"{MAGENTA}routines@git.build{CRESET}: Requesting build process for {self.package.meta.id}-{version}")
+    def update_package(self, version, server_name):
+        logger.info(
+            f"{MAGENTA}routines@git.build{CRESET}: Requesting build process on server '{CYAN}{server_name}{RESET}' "
+            f"for {self.package.meta.id}-{version}"
+        )
+        server = BuildServerClient(self.server.config.raw['build_server'][server_name]["address"])
+        server.connect()
 
     def is_buildserver_available(self):
         available_servers = 0
