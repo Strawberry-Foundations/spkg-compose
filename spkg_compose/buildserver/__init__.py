@@ -1,6 +1,6 @@
 from spkg_compose import BUILD_SERVER_VERSION, init_dir
 from spkg_compose.buildserver.config import config as _cfg
-from spkg_compose.cli.build import download_file
+from spkg_compose.cli.build import download_file_simple
 from spkg_compose.cli.logger import logger
 from spkg_compose.package import SpkgBuild
 from spkg_compose.server import convert_json_data, send_json
@@ -158,7 +158,7 @@ class BuildServer:
                             os.chdir("_work")
 
                             try:
-                                download_file(package.prepare.url, filename)
+                                download_file_simple(package.prepare.url, filename)
                             except Exception as err:
                                 logger.warning(f"Exception occurred {err}")
         
