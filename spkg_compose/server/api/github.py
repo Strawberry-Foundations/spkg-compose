@@ -20,6 +20,7 @@ class GitReleaseType(Enum):
 
 class GitHubApi:
     def __init__(self, repo_url: str, api_token: str, server, package: SpkgBuild, file_path):
+        self.status = {}
         self.repo_url = repo_url
         self.repo = ""
         self.api_token = api_token
@@ -187,8 +188,13 @@ class GitHubApi:
 
         return specfile_old
 
+    def build_pkg(self, server, arch, package, name):
+        _status = server.update_pkg(self, package, name)
+        server.disconnect()
+        self.status[arch]["status"] = True
+
     def update_package(self, version, servers):
-        status = {}
+        self.status = {}
         threads = []
 
         for arch, info in servers.items():
@@ -197,6 +203,14 @@ class GitHubApi:
                 f"{MAGENTA}routines@git.build.{name}{CRESET}: Requesting build process on server '{CYAN}{name}{RESET}' "
                 f"for arch '{CYAN}{arch}{RESET}' for package {GREEN}{self.package.meta.id}-{version}{RESET}"
             )
+
+            self.status.update({
+                arch: {
+                    "name": name,
+                    "status": False
+                }
+            })
+
             server = BuildServerClient(self.server.config.raw['build_server'][name]["address"])
             server.connect()
             server.auth(
@@ -207,17 +221,7 @@ class GitHubApi:
             data = read(self.file_path)
             package = SpkgBuild(data)
 
-            def _build():
-                _status = server.update_pkg(self, package, name)
-                server.disconnect()
-                status.update({
-                    arch: {
-                        "name": name,
-                        "status": _status
-                    }
-                })
-
-            thread = threading.Thread(target=_build)
+            thread = threading.Thread(target=self.build_pkg, args=(server, arch, package, name,))
             threads.append(thread)
             thread.start()
             time.sleep(2)
@@ -225,7 +229,8 @@ class GitHubApi:
         for thread in threads:
             thread.join()
 
-        return status
+        print(self.status)
+        return self.status
 
     def is_buildserver_available(self, architectures):
         servers = {}
