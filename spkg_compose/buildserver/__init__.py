@@ -40,6 +40,7 @@ class BuildServer:
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
         self.running = False
+        self.is_build_process = False
 
     def connection_thread(self):
         while self.running:
