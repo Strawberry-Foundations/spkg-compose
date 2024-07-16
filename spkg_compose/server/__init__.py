@@ -195,7 +195,8 @@ class Server:
                         available_servers += 1
                         logger.ok(
                             f"{MAGENTA}buildserver@{name}{CRESET}: Successfully connected to build server "
-                            f"'{CYAN}{name}{RESET}' (version {CYAN}{message['version']}{RESET})"
+                            f"'{CYAN}{name}{RESET}' (version {CYAN}{message['version']}{RESET} on "
+                            f"{GREEN}{message['architecture']}{RESET})"
                         )
                         _sock.send(send_json({
                             "event": "disconnect",
