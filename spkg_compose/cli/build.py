@@ -47,7 +47,6 @@ def download_file(url: str, path: str) -> None:
     urlretrieve(url=url, filename=path)
 
     open(".stop_download_progress", "a").close()
-    print("\n", end="")
 
 
 def _print_download_progress(file_path: Path, total_size) -> None:
