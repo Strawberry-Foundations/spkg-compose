@@ -6,6 +6,7 @@ from spkg_compose.utils.colors import *
 import socket
 import threading
 import sys
+import time
 
 
 class BuildServer:
@@ -17,7 +18,23 @@ class BuildServer:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-    def client_thread(self):
+        self.running = False
+        self.addresses = {}
+
+    def connection_thread(self):
+        while self.running:
+            try:
+                client, address = self.socket.accept()
+            except Exception as err:
+                logger.error(f"An error occurred while a client was trying to connect {err}")
+                break
+
+            self.addresses[client] = address
+
+            logger.info(f"Client '{address[0]}' connected")
+            threading.Thread(target=self.client_thread, args=(client,)).start()
+
+    def client_thread(self, client: socket.socket):
         pass
 
     def run(self):
@@ -26,14 +43,15 @@ class BuildServer:
                 self.socket.bind((self.config.address, self.config.port))
                 self.socket.listen()
                 logger.ok(f"Listening on {MAGENTA}{self.config.address}:{self.config.port}{RESET}")
+                self.running = True
 
             except OSError:
                 logger.error(f"Address already in use ({MAGENTA}{self.config.address}:{self.config.port}{RESET})")
                 sys.exit(1)
 
-            _connection = threading.Thread(target=self.client_thread())
-            _connection.start()
-            _connection.join()
+            connection = threading.Thread(target=self.connection_thread())
+            connection.start()
+            connection.join()
         except KeyboardInterrupt:
             logger.warning("spkg-compose server will be terminated")
 
