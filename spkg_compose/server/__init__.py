@@ -3,6 +3,7 @@ from spkg_compose.server.config import config as _cfg
 from spkg_compose.server.git import fetch_git
 from spkg_compose.core.parser import read
 from spkg_compose.cli.logger import logger, current_time
+from spkg_compose.server.json import send_json, convert_json_data
 from spkg_compose.utils.colors import *
 from spkg_compose.utils.time import unix_to_readable
 from spkg_compose.package import SpkgBuild
@@ -168,6 +169,8 @@ class Server:
         return timedelta(**kwargs)
 
     def run(self):
+        available_bservers = 0
+
         for name, value in self.config.raw['build_server'].items():
             logger.info(f"Trying to connect to build server '{CYAN}{name}{RESET}'")
             host, port = value["address"].split(":")
@@ -175,13 +178,37 @@ class Server:
             try:
                 _sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 _sock.connect((host, int(port)))
-                logger.ok(
-                    f"Successfully connected to build server '{CYAN}{name}{RESET}' at {MAGENTA}{host}:{port} {RESET}"
-                )
+                _sock.send(send_json({
+                    "event": "test_connection",
+                    "token": value["token"]
+                }).encode("utf8"))
+
+                message = _sock.recv(2048).decode('utf-8')
+                message = convert_json_data(message)
+
+                if message["response"]:
+                    if message["response"] == "ok":
+                        available_bservers += 1
+                        logger.ok(
+                            f"Successfully connected to build server '{CYAN}{name}{RESET}' at {MAGENTA}{host}:{port} {RESET}"
+                        )
+                    elif message["response"] == "invalid_token":
+                        logger.error(
+                            f"Invalid token for build server '{CYAN}{name}{RESET}'!"
+                        )
+                    else:
+                        logger.error(f"Build server '{CYAN}{name}{RESET}' did not send a valid response! ({message['response']})")
+                else:
+                    logger.error(f"Build server '{CYAN}{name}{RESET}' did not send a valid response! ({message})")
+
             except Exception as err:
                 logger.error(
                     f"Build server '{CYAN}{name}{RESET}' is not online! Please check if the build server is running ({err})"
                 )
+
+        if available_bservers == 0:
+            logger.error("No build server available! spkg-compose server will be terminated")
+            sys.exit(1)
 
         i = 0
         len_routines = len(self.config.routines)
