@@ -8,11 +8,13 @@ import socket
 import threading
 import sys
 
+addresses = {}
+
 
 class Client:
     def __init__(self, client: socket.socket, address):
         self.socket = client
-        self.address = address
+        self.address = address[0]
 
     def recv(self):
         raw_msg = self.socket.recv(2048).decode('utf-8')
@@ -20,6 +22,12 @@ class Client:
 
     def send(self, data):
         self.socket.send(send_json(data).encode("utf8"))
+
+    def close(self):
+        self.socket.close()
+        del addresses[self.socket]
+        logger.info(f"Client '{CYAN}{self.address}{RESET}' disconnected")
+        exit()
 
 
 class BuildServer:
@@ -32,7 +40,6 @@ class BuildServer:
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
         self.running = False
-        self.addresses = {}
 
     def connection_thread(self):
         while self.running:
@@ -42,9 +49,9 @@ class BuildServer:
                 logger.error(f"An error occurred while a client was trying to connect {err}")
                 break
 
-            self.addresses[client] = address
+            addresses[client] = address
 
-            logger.info(f"Client '{address[0]}' connected")
+            logger.info(f"Client '{CYAN}{address[0]}{RESET}' connected")
             client = Client(client, address)
             threading.Thread(target=self.client_thread, args=(client,)).start()
 
@@ -57,13 +64,17 @@ class BuildServer:
                 match event:
                     case "test_connection":
                         token = message["token"]
+                        logger.info(f"Client '{CYAN}{client.address}{CRESET}' sent {GREEN}event@test_connection{RESET}")
 
                         if token != self.config.token:
                             client.send({"response": "invalid_token"})
                         else:
                             client.send({"response": "ok"})
-            except KeyboardInterrupt as err:
-                logger.warning(f"Client disconnected ({err})")
+                    case "disconnect":
+                        client.close()
+
+            except Exception as err:
+                logger.warning(f"Client '{CYAN}{client.address}{RESET}' disconnected unexpected ({err})")
                 break
 
     def run(self):
