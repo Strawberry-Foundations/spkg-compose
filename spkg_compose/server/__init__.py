@@ -1,3 +1,5 @@
+import sys
+
 from spkg_compose import SERVER_VERSION, init_dir
 from spkg_compose.server.config import config as _cfg
 from spkg_compose.server.git import fetch_git
@@ -56,7 +58,12 @@ class Server:
         self.index = f"{init_dir}/data/index.json"
         self.running = Server.Running()
 
-        self.config.get_token("primary")
+        if 'token' in self.args.options:
+            try:
+                self.config.set_token(self.args.options["token"])
+            except KeyError:
+                logger.error(f"Token '{CYAN}{self.args.options['token']}{RESET}' not found")
+                sys.exit(1)
 
     def indexing(self):
         i = 0
