@@ -7,11 +7,12 @@ import json
 
 
 class GitHubApi:
-    def __init__(self, repo_url, api_token, server, package: SpkgBuild):
+    def __init__(self, repo_url: str, api_token: str, server, package: SpkgBuild, file_path):
         self.repo_url = repo_url
         self.api_token = api_token
         self.server = server
         self.package = package
+        self.file_path = file_path
 
         with open(self.server.index, 'r') as json_file:
             self.index = json.load(json_file)
