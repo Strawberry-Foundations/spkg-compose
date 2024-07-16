@@ -2,6 +2,7 @@ from spkg_compose.cli.logger import logger
 from spkg_compose.utils.colors import *
 
 import requests
+import json
 
 
 class GitHubApi:
@@ -9,6 +10,9 @@ class GitHubApi:
         self.repo_url = repo_url
         self.api_token = api_token
         self.server = server
+
+        with open(self.server.index, 'r') as json_file:
+            self.index = json.load(json_file)
 
     def fetch(self):
         api_url, repo = self.to_gh_api_url("releases")
