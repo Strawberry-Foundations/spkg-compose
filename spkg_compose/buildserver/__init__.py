@@ -40,7 +40,7 @@ class BuildServer:
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
         self.running = False
-        self.is_build_process = False
+        self.is_build_process = True
 
     def connection_thread(self):
         while self.running:
@@ -71,8 +71,18 @@ class BuildServer:
                             client.send({"response": "invalid_token"})
                         else:
                             client.send({"response": "ok"})
+
                     case "disconnect":
                         client.close()
+
+                    case "request_slot":
+                        status = ""
+                        if self.is_build_process:
+                            status = "full"
+                        else:
+                            status = "free"
+
+                        client.send({"response": status})
 
             except Exception as err:
                 logger.warning(f"Client '{CYAN}{client.address}{RESET}' disconnected unexpected ({err})")
