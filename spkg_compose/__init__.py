@@ -6,3 +6,4 @@ init_dir = os.path.dirname(server_dir)
 
 VERSION = "1.2.0"
 SERVER_VERSION = "1.1.3"
+BUILD_SERVER_VERSION = "1.0.1"
