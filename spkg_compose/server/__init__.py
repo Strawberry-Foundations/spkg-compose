@@ -52,7 +52,7 @@ class Server:
         self.running_indexing = False
         self.running_gitfetch = False
 
-        self.config.get_token("secondary")
+        self.config.get_token("primary")
 
     def indexing(self):
         i = 0
