@@ -19,6 +19,7 @@ def fetch_git(server):
                     git = GitHubApi(
                         repo_url=repo_url,
                         api_token=server.config.gh_token,
-                        server=server
+                        server=server,
+                        package=package
                     )
                     git.fetch()
