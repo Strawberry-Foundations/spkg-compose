@@ -157,9 +157,17 @@ class GitHubApi:
             logger.error(f"{MAGENTA}routines@git.build{CRESET}: Something went wrong while updating package")
             success = False
 
-        if success:
-            logger.ok(f"{MAGENTA}routines@git.build{CRESET}: Build succeeded")
-        else:
+        successful_processes = 0
+        total_processes = len(success)
+
+        for arch, info in success.items():
+            if info["status"]:
+                successful_processes += 1
+                logger.ok(f"{MAGENTA}routines@git.build.{info['name']}{CRESET}: Build succeeded for {CYAN}{arch}{RESET}")
+            else:
+                logger.warning(
+                    f"{MAGENTA}routines@git.build.{info['name']}{CRESET}: Build not succeeded for {CYAN}{arch}{RESET}")
+        if successful_processes < total_processes:
             self.rollback(
                 compose_old=compose_old,
                 specfile_old=specfile_old,
@@ -203,20 +211,21 @@ class GitHubApi:
                 _status = server.update_pkg(self, package, name)
                 server.disconnect()
                 status.update({
-                    arch: False
+                    arch: {
+                        "name": name,
+                        "status": _status
+                    }
                 })
 
             thread = threading.Thread(target=_build)
-            thread.daemon = True
             threads.append(thread)
             thread.start()
-
             time.sleep(2)
 
         for thread in threads:
             thread.join()
 
-        return False
+        return status
 
     def is_buildserver_available(self, architectures):
         servers = {}
