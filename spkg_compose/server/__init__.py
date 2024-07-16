@@ -38,7 +38,7 @@ class Server:
     def __init__(self, args):
         self.routine_processes = {
             "indexing": self.indexing,
-            "fetch_git": self.fetch_git
+            "git": self.fetch_git
         }
         self.units = {
             'h': 'hours',
@@ -96,7 +96,7 @@ class Server:
                 time.sleep(1)
                 continue
             self.running_gitfetch = True
-            logger.info(f"{MAGENTA}routines@fetch_git{CRESET}: Starting git fetch")
+            logger.info(f"{MAGENTA}routines@git{CRESET}: Starting git fetch")
             headers = {
                 'Accept': 'application/vnd.github.v3+json',
                 'Authorization': f'Bearer {self.config.gh_token}'
@@ -108,20 +108,20 @@ class Server:
             rlimit_reset = result["resources"]["core"]["reset"]
 
             logger.info(
-                f"{MAGENTA}routines@fetch_git{CRESET}: {calculate_percentage(rlimit_limit, rlimit_remaining)}"
+                f"{MAGENTA}routines@git{CRESET}: {calculate_percentage(rlimit_limit, rlimit_remaining)}"
                 f"of {rlimit_limit} requests available (Will reset on {unix_to_readable(rlimit_reset)})"
             )
 
             if rlimit_remaining == 0:
-                logger.error(f"{MAGENTA}routines@fetch_git{CRESET}: API rate limit exceeded. Canceling routine")
+                logger.error(f"{MAGENTA}routines@git{CRESET}: API rate limit exceeded. Canceling routine")
                 logger.error(
-                    f"{MAGENTA}routines@fetch_git{CRESET}: The API rate limit will be reset on "
+                    f"{MAGENTA}routines@git{CRESET}: The API rate limit will be reset on "
                     f"{unix_to_readable(rlimit_reset)}"
                 )
                 break
 
             fetch_git(self)
-            logger.info(f"{MAGENTA}routines@fetch_git{CRESET}: Finished git fetch")
+            logger.info(f"{MAGENTA}routines@git{CRESET}: Finished git fetch")
             self.running_gitfetch = False
             break
 
