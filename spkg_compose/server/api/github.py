@@ -8,6 +8,7 @@ from enum import Enum
 
 import requests
 import json
+import copy
 
 
 class GitReleaseType(Enum):
@@ -159,7 +160,7 @@ class GitHubApi:
         with open(self.index[self.package.meta.id]["specfile"], 'r') as file:
             specfile = ordered_load(file)
 
-        specfile_old = specfile
+        specfile_old = copy.deepcopy(specfile)
 
         specfile["package"]["version"] = version
 
