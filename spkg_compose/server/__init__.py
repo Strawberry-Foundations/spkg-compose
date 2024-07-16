@@ -5,7 +5,7 @@ from spkg_compose.core.parser import read
 from spkg_compose.cli.logger import logger, current_time
 from spkg_compose.server.json import send_json, convert_json_data
 from spkg_compose.utils.colors import *
-from spkg_compose.utils.time import unix_to_readable
+from spkg_compose.utils.time import unix_to_readable, convert_time
 from spkg_compose.package import SpkgBuild
 
 from datetime import datetime, timedelta
@@ -155,10 +155,18 @@ class Server:
 
             if now >= next_run:
                 logger.routine(f"Running routine '{CYAN}{routine['name']}{RESET}' at {time_fmt}")
+
+                start_time = time.time()
                 self.routine_processes[process_name]()
+                end_time = time.time()
+                elapsed_time = end_time - start_time
+
                 next_run = now + interval
                 next_run_fmt = next_run.strftime("%Y-%m-%d %H:%M:%S")
-                logger.routine(f"Routine finished. Next run for '{CYAN}{routine['name']}{RESET}' at {next_run_fmt}")
+                logger.routine(
+                    f"Routine finished. Took {CYAN}{convert_time(elapsed_time)}{RESET}. "
+                    f"Next run for '{CYAN}{routine['name']}{RESET}' at {next_run_fmt}"
+                )
 
             time.sleep(1)
 
