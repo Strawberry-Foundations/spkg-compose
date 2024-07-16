@@ -114,8 +114,6 @@ class BuildServer:
                             authenticated[client] = True
 
                     case "disconnect":
-                        if not client.is_authenticated():
-                            return client.not_authenticated()
                         client.close()
 
                     case "request_slot":
