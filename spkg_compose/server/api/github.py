@@ -126,7 +126,9 @@ class GitHubApi:
         )
 
         # Check if build server is available
-        server_available, server_name = self.is_buildserver_available()
+        servers = self.is_buildserver_available(self.index[self.package.meta.id]["architectures"])
+        print(servers)
+        return 0
 
         if not server_available:
             logger.warning(f"{MAGENTA}routines@git.build{CRESET}: Canceling update process")
@@ -195,32 +197,76 @@ class GitHubApi:
         status = server.update_pkg(self, package)
         server.disconnect()
 
-        return status
+        return False
 
-    def is_buildserver_available(self):
-        available_servers = 0
-        logger.info(f"{MAGENTA}routines@git.build{CRESET}: Checking whether a build server is available")
-        for name, value in self.server.config.raw['build_server'].items():
-            server = BuildServerClient(value["address"])
-            server.connect()
-            server.auth(
-                token=self.server.config.raw['build_server'][name]["token"],
-                server_name=name,
-                silent=True
+    def is_buildserver_available(self, architectures):
+        servers = {}
+        total_available_servers = 0
+
+        if len(architectures) < 2:
+            suffix = f"architecture {CYAN}{architectures[0]}{RESET}"
+        else:
+            suffix = f"architectures {CYAN}{f'{GRAY},{CYAN} '.join(architectures)}{RESET}"
+
+        logger.info(f"{MAGENTA}routines@git.build{CRESET}: Checking whether a build server is available for {suffix}")
+
+        for arch in architectures:
+            available_servers = 0
+
+            for name, value in self.server.config.raw['build_server'].items():
+                if not value["tags"].__contains__(arch):
+                    continue
+
+                server = BuildServerClient(value["address"])
+                server.connect()
+                server.auth(
+                    token=self.server.config.raw['build_server'][name]["token"],
+                    server_name=name,
+                    silent=True
+                )
+
+                status = server.request_slot()
+                if status:
+                    logger.ok(
+                        f"{MAGENTA}routines@git.build{CRESET}: Server '{CYAN}{name}{RESET}' for arch "
+                        f"'{GREEN}{arch}{RESET}' is free"
+                    )
+                    available_servers += 1
+                    total_available_servers += 1
+
+                    server.disconnect()
+                    servers.update({
+                        arch: {
+                            "name": name,
+                            "available": True
+                        }
+                    })
+                else:
+                    logger.warning(
+                        f"{MAGENTA}routines@git.build{CRESET}: Server '{CYAN}{name}{RESET}' for arch "
+                        f"'{GREEN}{arch}{RESET}' is full"
+                    )
+                    server.disconnect()
+                    servers.update({
+                        arch: {
+                            "name": name,
+                            "available": True
+                        }
+                    })
+
+            if available_servers == 0:
+                logger.warning(
+                    f"{MAGENTA}routines@git.build{CRESET}: No build server for arch '{GREEN}{arch}{RESET}' "
+                    f"is currently available"
+                )
+
+        if total_available_servers == 0:
+            logger.warning(
+                f"{MAGENTA}routines@git.build{CRESET}: There is currently no build server available for any of "
+                f"the available architectures."
             )
 
-            status = server.request_slot()
-            if not status:
-                logger.warning(f"{MAGENTA}routines@git.build{CRESET}: Server '{CYAN}{name}{RESET}' is full")
-                server.disconnect()
-                continue
-            else:
-                server.disconnect()
-                return True, name
-
-        if available_servers == 0:
-            logger.warning(f"{MAGENTA}routines@git.build{CRESET}: No build server is currently available")
-            return False, ""
+        return servers
 
     def rollback(self, compose_old, specfile_old, index_version):
         logger.warning(
