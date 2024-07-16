@@ -18,7 +18,7 @@ class LogFormat:
         self.critical = f"{C_RESET}{BOLD}[%<time>%] {YELLOW}[%<levelname>%]{C_RESET} [%<message>%]"
         self.panic = f"{C_RESET}{BOLD}[%<time>%] {RED}[%<levelname>%]{C_RESET}   [%<message>%]"
         self.routine = f"{C_RESET}{BOLD}[%<time>%] {MAGENTA}[%<levelname>%]{C_RESET} [%<message>%]"
-        self.time_fmt = "%Y-%m-%d %H:%M"
+        self.time_fmt = "%Y-%m-%d %H:%M:%S"
 
 
 class LogLevel(Enum):
