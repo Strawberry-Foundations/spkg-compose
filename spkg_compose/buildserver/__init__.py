@@ -55,7 +55,7 @@ class BuildServer:
                                 "response": "ok",
                             }).encode("utf8"))
             except:
-                logger.error(f"Failed to communicate with client")
+                logger.warning(f"Client disconnected")
                 break
 
     def run(self):
