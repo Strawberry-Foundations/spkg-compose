@@ -50,7 +50,7 @@ class BuildServerClient:
             return False
 
         logger.info(
-            f"{MAGENTA}routines@git.build{CRESET}: The system waits until the server has finished the build process"
+            f"{MAGENTA}routines@git.build{CRESET}: The system waits until the server has finished the build process ..."
         )
         message = self.recv()
         response = message["response"]
