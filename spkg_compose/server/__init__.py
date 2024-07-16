@@ -144,6 +144,8 @@ class Server:
                 logger.routine(f"Running routine '{CYAN}{routine['name']}{RESET}' at {time_fmt}")
                 self.routine_processes[process_name]()
                 next_run = now + interval
+                next_run_fmt = next_run.strftime("%Y-%m-%d %H:%M:%S")
+                logger.routine(f"Routine finished. Next run for '{CYAN}{routine['name']}{RESET}' at {next_run_fmt}")
 
             time.sleep(1)
 
