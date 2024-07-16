@@ -9,6 +9,7 @@ from enum import Enum
 import requests
 import json
 import copy
+import threading
 
 
 class GitReleaseType(Enum):
@@ -196,13 +197,17 @@ class GitHubApi:
             data = read(self.file_path)
             package = SpkgBuild(data)
 
-            status = server.update_pkg(self, package)
-            server.disconnect()
+            def _build():
+                _status = server.update_pkg(self, package)
+                server.disconnect()
+                status.update({
+                    arch: False
+                })
 
-            status.update({
-                arch: False
-            })
-            return False
+            thread = threading.Thread(target=_build())
+            thread.start()
+
+        return False
 
     def is_buildserver_available(self, architectures):
         servers = {}
