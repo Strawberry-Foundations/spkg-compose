@@ -219,7 +219,7 @@ class Server:
                     )
                     _sock.close()
 
-            except Exception as err:
+            except AttributeError as err:
                 logger.error(
                     f"{MAGENTA}builserver@{name}{CRESET}: Build server '{CYAN}{name}{RESET}' is not online! "
                     f"Please check if the build server is running ({err})"
