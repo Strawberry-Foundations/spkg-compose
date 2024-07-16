@@ -44,10 +44,11 @@ except FileNotFoundError:
 class Config:
     def __init__(self):
         try:
+            self.raw = config_data
             self.data_dir = config_data["server"]["data_dir"]
             self.routines = config_data["routines"]
             self.gh_token = config_data["github"]["tokens"]["primary"]["token"]
-            self.build_server = config_data["build_server"]
+            self.build_server = config_data["build_server"].items()
         except KeyError as err:
             logger.error(f"Invalid configuration! Please check your configuration file. (Missing key: {err})")
             sys.exit(1)
