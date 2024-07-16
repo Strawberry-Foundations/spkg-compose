@@ -127,10 +127,8 @@ class GitHubApi:
 
         # Check if build server is available
         servers = self.is_buildserver_available(self.index[self.package.meta.id]["architectures"])
-        print(servers)
-        return 0
 
-        if not server_available:
+        if not servers:
             logger.warning(f"{MAGENTA}routines@git.build{CRESET}: Canceling update process")
             return 0
 
@@ -152,7 +150,7 @@ class GitHubApi:
 
         # Update package
         try:
-            success = self.update_package(version, server_name)
+            success = self.update_package(version=version, servers=servers)
         except:
             logger.error(f"{MAGENTA}routines@git.build{CRESET}: Something went wrong while updating package")
             success = False
@@ -179,25 +177,27 @@ class GitHubApi:
 
         return specfile_old
 
-    def update_package(self, version, server_name):
-        logger.info(
-            f"{MAGENTA}routines@git.build{CRESET}: Requesting build process on server '{CYAN}{server_name}{RESET}' "
-            f"for {self.package.meta.id}-{version}"
-        )
-        server = BuildServerClient(self.server.config.raw['build_server'][server_name]["address"])
-        server.connect()
-        server.auth(
-            token=self.server.config.raw['build_server'][server_name]["token"],
-            server_name=server_name,
-        )
+    def update_package(self, version, servers):
+        for arch, info in servers.items():
+            name = info["name"]
+            logger.info(
+                f"{MAGENTA}routines@git.build{CRESET}: Requesting build process on server '{CYAN}{name}{RESET}' "
+                f"for arch '{CYAN}{arch}{RESET}' for package {GREEN}{self.package.meta.id}-{version}{RESET}"
+            )
+            server = BuildServerClient(self.server.config.raw['build_server'][name]["address"])
+            server.connect()
+            server.auth(
+                token=self.server.config.raw['build_server'][name]["token"],
+                server_name=name,
+            )
 
-        data = read(self.file_path)
-        package = SpkgBuild(data)
+            data = read(self.file_path)
+            package = SpkgBuild(data)
 
-        status = server.update_pkg(self, package)
-        server.disconnect()
+            status = server.update_pkg(self, package)
+            server.disconnect()
 
-        return False
+            return False
 
     def is_buildserver_available(self, architectures):
         servers = {}
@@ -250,7 +250,7 @@ class GitHubApi:
                     servers.update({
                         arch: {
                             "name": name,
-                            "available": True
+                            "available": False
                         }
                     })
 
@@ -265,6 +265,7 @@ class GitHubApi:
                 f"{MAGENTA}routines@git.build{CRESET}: There is currently no build server available for any of "
                 f"the available architectures."
             )
+            return None
 
         return servers
 
