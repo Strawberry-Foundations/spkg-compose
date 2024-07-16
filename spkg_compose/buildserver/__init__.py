@@ -1,3 +1,5 @@
+import json.decoder
+
 from spkg_compose import BUILD_SERVER_VERSION, init_dir
 from spkg_compose.buildserver.config import config as _cfg
 from spkg_compose.cli.build import download_file
@@ -83,7 +85,12 @@ class BuildServer:
     def client_thread(self, client: Client):
         while self.running:
             try:
-                message = client.recv()
+                try:
+                    message = client.recv()
+                except json.decoder.JSONDecodeError:
+                    logger.info(f"Client '{CYAN}{client.address}{RESET}' disconnected")
+                    break
+
                 event = message["event"]
 
                 match event:
@@ -96,6 +103,7 @@ class BuildServer:
                         if token != self.config.token:
                             client.send({"response": "invalid_token"})
                             logger.warning(f"{LIGHT_BLUE}auth{RESET}: Invalid token from '{CYAN}{client.address}{CRESET}'")
+                            client.close()
                         else:
                             client.send({"response": "ok", "version": BUILD_SERVER_VERSION})
                             logger.ok(f"{LIGHT_BLUE}auth{RESET}: Token is valid")
@@ -166,7 +174,7 @@ class BuildServer:
                         logger.ok(f"{MAGENTA}rt@build{CRESET}: Package successfully build as '{CYAN}{package}{RESET}'")
                         client.send({"response": "success", "package_file": package})
 
-            except KeyError as err:
+            except Exception as err:
                 logger.warning(f"Client '{CYAN}{client.address}{RESET}' disconnected unexpected ({err})")
                 break
 
