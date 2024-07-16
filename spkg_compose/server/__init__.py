@@ -78,7 +78,11 @@ class Server:
 
                         if name not in index:
                             logger.info(f"Found new compose package '{CYAN}{name}{CRESET}'")
-                            index[name] = {'compose': file_path}
+                            index[name] = {
+                                'compose': file_path,
+                                'last_commit': '',
+                                'specfile': file_path.replace("/compose.spkg", "/specfile.yml")
+                            }
 
             with open(self.index, 'w') as json_file:
                 json.dump(index, json_file, indent=2)
