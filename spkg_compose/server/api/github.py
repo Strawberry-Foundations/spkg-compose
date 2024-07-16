@@ -180,6 +180,7 @@ class GitHubApi:
         )
         server = BuildServerClient(self.server.config.raw['build_server'][server_name]["address"])
         server.connect()
+        server.auth(self.server.config.raw['build_server'][server_name]["token"], server_name)
 
         data = read(self.file_path)
         package = SpkgBuild(data)
@@ -195,6 +196,7 @@ class GitHubApi:
         for name, value in self.server.config.raw['build_server'].items():
             server = BuildServerClient(value["address"])
             server.connect()
+            server.auth(self.server.config.raw['build_server'][name]["token"], name)
 
             status = server.request_slot()
             if not status:
