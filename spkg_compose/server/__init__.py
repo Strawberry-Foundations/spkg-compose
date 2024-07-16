@@ -124,12 +124,15 @@ class Server:
             if self.running.index:
                 time.sleep(1)
                 continue
+
             self.running.git = True
+
             logger.info(f"{MAGENTA}routines@git{CRESET}: Starting git fetch")
             headers = {
                 'Accept': 'application/vnd.github.v3+json',
                 'Authorization': f'Bearer {self.config.gh_token}'
             }
+
             response = requests.get("https://api.github.com/rate_limit", headers=headers)
             result = response.json()
             rlimit_limit = result["resources"]["core"]["limit"]
