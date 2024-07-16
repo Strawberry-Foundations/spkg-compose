@@ -13,6 +13,7 @@ import os
 import shutil
 
 addresses = {}
+authenticated = {}
 
 
 class Client:
@@ -32,6 +33,25 @@ class Client:
         del addresses[self.socket]
         logger.info(f"Client '{CYAN}{self.address}{RESET}' disconnected")
         exit()
+
+    def is_authenticated(self):
+        if authenticated.__contains__(self):
+            if authenticated[self]:
+                return True
+            logger.info(
+                f"{LIGHT_BLUE}auth{RESET}: Unauthenticated client '{CYAN}{self.address}{CRESET} connected & "
+                f"tried to run job'"
+            )
+            return False
+        logger.info(
+            f"{LIGHT_BLUE}auth{RESET}: Unauthenticated client '{CYAN}{self.address}{CRESET} connected & "
+            f"tried to run job'"
+        )
+        return False
+
+    def not_authenticated(self):
+        self.send({"response": "not_authenticated"})
+        self.close()
 
 
 class BuildServer:
@@ -91,11 +111,17 @@ class BuildServer:
                         else:
                             client.send({"response": "ok"})
                             logger.ok(f"{LIGHT_BLUE}auth{RESET}: Token is valid")
+                            authenticated[client] = True
 
                     case "disconnect":
+                        if not client.is_authenticated():
+                            return client.not_authenticated()
                         client.close()
 
                     case "request_slot":
+                        if not client.is_authenticated():
+                            return client.not_authenticated()
+
                         logger.info(f"Slot request from '{CYAN}{client.address}{CRESET}'")
                         if self.is_build_process:
                             status = "full"
@@ -106,6 +132,9 @@ class BuildServer:
                         client.send({"response": status})
 
                     case "update_pkg":
+                        if not client.is_authenticated():
+                            return client.not_authenticated()
+
                         package = SpkgBuild(message["data"])
                         logger.routine(
                             f"{MAGENTA}rt@build{CRESET}: Build request from '{CYAN}{client.address}{CRESET}' for "
