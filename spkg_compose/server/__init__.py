@@ -18,16 +18,20 @@ from spkg_compose.utils.time import unix_to_readable
 
 
 class Server:
-    def __init__(self):
+    def __init__(self, args):
         self.routine_processes = {
             "indexing": self.indexing,
             "fetch_git": self.fetch_git
         }
 
         self.config = _cfg
+        self.args = args
         self.index = f"{init_dir}/data/index.json"
         self.running_indexing = False
         self.running_gitfetch = False
+
+        self.config.get_token("primary")
+        print(args)
 
     def indexing(self):
         while True:
@@ -144,8 +148,8 @@ class Server:
             logger.warning("spkg-compose server will be terminated")
 
 
-def server_main():
+def server_main(args):
     logger.default(f"Starting spkg-compose server v{SERVER_VERSION}")
 
-    server = Server()
+    server = Server(args)
     server.run()
