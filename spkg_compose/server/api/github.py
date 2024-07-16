@@ -172,7 +172,8 @@ class GitHubApi:
             self.rollback(
                 compose_old=compose_old,
                 specfile_old=specfile_old,
-                index_version=previous_index_version
+                index_version=previous_index_version,
+                release_type=release_type
             )
 
     def update_specfile(self, version):
@@ -226,8 +227,8 @@ class GitHubApi:
             thread.start()
             time.sleep(2)
 
-        for thread in threads:
-            thread.join()
+        # for thread in threads:
+        #    thread.join()
 
         return self.status
 
@@ -301,11 +302,20 @@ class GitHubApi:
 
         return servers
 
-    def rollback(self, compose_old, specfile_old, index_version):
+    def rollback(self, compose_old, specfile_old, index_version, release_type: GitReleaseType):
+        new_version = ""
+        old_version = ""
+        match release_type:
+            case GitReleaseType.RELEASE:
+                new_version = self.index[self.package.meta.id]['latest'].replace('v', '')
+                old_version = index_version.replace('v', '')
+            case GitReleaseType.COMMIT:
+                new_version = f"git+{self.index[self.package.meta.id]['latest'][:7]}"
+                old_version = f"git+{index_version[:7]}"
+
         logger.warning(
             f"{MAGENTA}routines@git.build{CRESET}: Something went wrong - Rolling back previous changes "
-            f"({GREEN}{self.index[self.package.meta.id]['latest'].replace('v', '')}{RESET}{GRAY}->"
-            f"{YELLOW}{index_version.replace('v', '')}{RESET})"
+            f"({GREEN}{new_version}{RESET}{GRAY}->{YELLOW}{old_version}{RESET})"
         )
         with open(self.file_path, 'w') as file:
             file.write(compose_old)
