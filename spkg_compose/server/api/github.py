@@ -109,8 +109,6 @@ class GitHubApi:
                                 "This should not happen. Either the version was changed manually or the "
                                 "update process was interrupted."
                             )
-                        case 2:
-                            self.rt_logger.warning("No build server available")
             else:
                 self.fetch_commit()
         else:
@@ -165,8 +163,6 @@ class GitHubApi:
                                 "This should not happen. Either the version was changed manually or the "
                                 "update process was interrupted."
                             )
-                        case 2:
-                            self.rt_logger.warning("No build server available")
         else:
             self.rt_logger.error(f"Error while fetching {repo} (Status code {response.status_code})")
 
