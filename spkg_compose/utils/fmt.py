@@ -24,7 +24,7 @@ def calculate_percentage(total, value):
         color = RED
 
     reset_color = "\033[0m"
-    return f"{color}{value} ({percentage:.2f}%) {reset_color}"
+    return f"{color}{value} ({percentage:.2f}%){reset_color}"
 
 
 def parse_interval(interval_str):
