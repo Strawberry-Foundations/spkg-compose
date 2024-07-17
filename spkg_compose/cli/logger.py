@@ -106,22 +106,22 @@ class RtLogger:
     def __init__(self, rt_name: str):
         self.rt_name = rt_name
 
-    def info(self, message, suffix: str = None):
-        if suffix:
+    def info(self, message, suffix: str = ""):
+        if suffix != "":
             suffix = f".{suffix}"
         logger.info(f"{MAGENTA}routines@{self.rt_name}{suffix}{CRESET}: {message}")
 
-    def ok(self, message, suffix: str = None):
-        if suffix:
+    def ok(self, message, suffix: str = ""):
+        if suffix != "":
             suffix = f".{suffix}"
         logger.ok(f"{MAGENTA}routines@{self.rt_name}{suffix}{CRESET}: {message}")
 
-    def warning(self, message, suffix: str = None):
-        if suffix:
+    def warning(self, message, suffix: str = ""):
+        if suffix != "":
             suffix = f".{suffix}"
         logger.warning(f"{MAGENTA}routines@{self.rt_name}{suffix}{CRESET}: {message}")
 
-    def error(self, message, suffix: str = None):
-        if suffix:
+    def error(self, message, suffix: str = ""):
+        if suffix != "":
             suffix = f".{suffix}"
         logger.error(f"{MAGENTA}routines@{self.rt_name}{suffix}{CRESET}: {message}")
