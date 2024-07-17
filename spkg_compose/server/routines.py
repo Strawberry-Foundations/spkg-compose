@@ -6,7 +6,7 @@ from spkg_compose.core.parser import read
 from spkg_compose.utils.colors import *
 from spkg_compose.utils.fmt import calculate_percentage, parse_interval
 from spkg_compose.utils.time import unix_to_readable, current_time, convert_time
-from spkg_compose.cli.logger import logger
+from spkg_compose.cli.logger import logger, RtLogger
 from spkg_compose.package import SpkgBuild
 
 from datetime import datetime
