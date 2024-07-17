@@ -17,6 +17,23 @@ import requests
 import yaml
 
 
+class RtLogger:
+    def __init__(self, rt_name: str):
+        self.rt_name = rt_name
+
+    def info(self, message):
+        logger.info(f"{MAGENTA}routines@{self.rt_name}{CRESET}: {message}")
+
+    def ok(self, message):
+        logger.ok(f"{MAGENTA}routines@{self.rt_name}{CRESET}: {message}")
+
+    def warning(self, message):
+        logger.warning(f"{MAGENTA}routines@{self.rt_name}{CRESET}: {message}")
+
+    def error(self, message):
+        logger.error(f"{MAGENTA}routines@{self.rt_name}{CRESET}: {message}")
+
+
 class Running:
     def __init__(self):
         self.indexing = False
@@ -34,51 +51,75 @@ class Routines:
 
         self.processes = {
             "indexing": self.indexing,
-            "git_checkout": self.gh_checkout
+            "checkout": self.checkout
         }
 
     @staticmethod
-    def routine(conflicts: bool):
+    def routine(conflicts: str = None):
         """-- Routine decorator
             This decorator will wrap some functions that are required for a routine
         """
 
+        def _get_rt(_conflicts):
+            match _conflicts:
+                case "checkout":
+                    return rt.gh_checkout
+                case "indexing":
+                    return rt.indexing
+
         def _set_rt(_rt, state: bool):
             match _rt:
-                case "gh_checkout":
+                case "checkout":
                     rt.gh_checkout = state
                 case "indexing":
                     rt.indexing = state
 
         def decorator(func):
             def wrapper(self, *args, **kwargs):
+                _set_rt(func.__name__, True)
+
+                if conflicts is not None:
+                    if _get_rt(conflicts):
+                        logger.routine(
+                            f"{MAGENTA}{func.__name__}{RESET}: Waiting for routine '{CYAN}{conflicts}{RESET}' to finish"
+                        )
+
                 while True:
-                    if conflicts:
-                        time.sleep(1)
-                        continue
+                    if conflicts is not None:
+                        if _get_rt(conflicts):
+                            time.sleep(1)
+                            continue
 
-                    _set_rt(func.__name__, True)
+                    rt_logger = RtLogger(rt_name=func.__name__)
 
-                    return func(self, *args, **kwargs)
+                    function = func(self, rt_logger, *args, **kwargs)
+
+                    _set_rt(func.__name__, False)
+
+                    return function
 
             return wrapper
 
         return decorator
 
-    @routine(conflicts=rt.gh_checkout)
-    def indexing(self):
+    @routine(conflicts="gh_checkout")
+    def indexing(self, rt_logger: RtLogger):
         """-- Routine for indexing
             This routine checks for new *.spkg files. If there are any new files, this routine will
             append it to the index.json
         """
         i = 0
-        logger.info(f"{MAGENTA}routines@indexing{CRESET}: Starting indexing")
+
+        rt_logger.info("Starting indexing")
+
+        # Check if index path already exists and load index, if not, create new index
         if os.path.exists(self.server.index):
             with open(self.server.index, "r") as json_file:
                 index = json.load(json_file)
         else:
             index = {}
 
+        # Iterate data dir for *.spkg files
         for root, _, files in os.walk(self.server.config.data_dir):
             for file in files:
                 if file.endswith(".spkg"):
@@ -88,11 +129,10 @@ class Routines:
                     package = SpkgBuild(data)
                     name = package.meta.id
 
+                    # If cached data is not in index, add data to index.json
                     if name not in index:
                         i += 1
-                        logger.info(
-                            f"{MAGENTA}routines@indexing{CRESET}: Found new compose package '{CYAN}{name}{CRESET}'"
-                        )
+                        rt_logger.info(f"Found new compose package '{CYAN}{name}{CRESET}'")
                         specfile_path = file_path.replace("/compose.spkg", "/specfile.yml")
 
                         with open(specfile_path, "r") as _config:
@@ -111,17 +151,19 @@ class Routines:
 
         with open(self.server.index, 'w') as json_file:
             json.dump(index, json_file, indent=2)
-        if i == 0:
-            logger.info(f"{MAGENTA}routines@indexing{CRESET}: Nothing to do, everything up to date.")
-        logger.ok(f"{MAGENTA}routines@indexing{CRESET}: Finished indexing, found {i} new packages")
 
-    @routine(conflicts=rt.indexing)
-    def gh_checkout(self):
+        if i == 0:
+            rt_logger.info(f"Nothing to do, everything up to date.")
+
+        rt_logger.ok(f"Finished indexing, found {i} new packages")
+
+    @routine(conflicts="indexing")
+    def checkout(self, rt_logger: RtLogger):
         """-- Routine for git checkout
             This routine checks whether the GitHub repositories of the packages in this repository
             have a new release or a new commit
         """
-        logger.info(f"{MAGENTA}routines@git{CRESET}: Starting git fetch")
+        rt_logger.info(f"Starting git fetch")
         headers = {
             'Accept': 'application/vnd.github.v3+json',
             'Authorization': f'Bearer {self.server.config.gh_token}'
@@ -133,24 +175,21 @@ class Routines:
         rlimit_remaining = result["resources"]["core"]["remaining"]
         rlimit_reset = result["resources"]["core"]["reset"]
 
-        logger.info(
-            f"{MAGENTA}routines@git{CRESET}: {calculate_percentage(rlimit_limit, rlimit_remaining)}"
-            f"of {rlimit_limit} requests available (Will reset on {unix_to_readable(rlimit_reset)})"
+        rt_logger.info(
+            f"{calculate_percentage(rlimit_limit, rlimit_remaining)} of {rlimit_limit} requests available "
+            f"(Will reset on {unix_to_readable(rlimit_reset)})"
         )
 
         if rlimit_remaining == 0:
-            logger.error(f"{MAGENTA}routines@git{CRESET}: API rate limit exceeded. Canceling routine")
-            logger.error(
-                f"{MAGENTA}routines@git{CRESET}: The API rate limit will be reset on "
-                f"{unix_to_readable(rlimit_reset)}"
-            )
+            rt_logger.error(f"API rate limit exceeded. Canceling routine")
+            rt_logger.error(f"The API rate limit will be reset on {unix_to_readable(rlimit_reset)}")
             return 1
 
         fetch_git(self)
-        logger.info(f"{MAGENTA}routines@git{CRESET}: Finished git fetch")
+        rt_logger.info(f"Finished git fetch")
 
     def run_routine(self, routine):
-        """Runs a routine"""
+        """Executes a routine and checks when the routine should next be executed"""
         process_name = routine['process']
         every = routine['every']
         interval = parse_interval(every)
