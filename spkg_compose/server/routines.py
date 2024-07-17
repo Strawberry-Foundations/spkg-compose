@@ -1,5 +1,5 @@
 from spkg_compose import init_dir
-from spkg_compose.server.api.github import check_ratelimit
+from spkg_compose.server.api.github import gh_check_ratelimit
 from spkg_compose.server.git import fetch_git
 from spkg_compose.server.config import config as _cfg
 from spkg_compose.core.parser import read
@@ -165,7 +165,7 @@ class Routines:
         """
         rt_logger.info(f"Starting git fetch")
 
-        limit, remaining, reset = check_ratelimit(self.server.config.gh_token)
+        limit, remaining, reset = gh_check_ratelimit(self.server.config.gh_token)
 
         rt_logger.info(
             f"{calculate_percentage(limit, remaining)} of {limit} requests available "
