@@ -47,6 +47,17 @@ class GitHubApi:
         with open(self.server.index, 'r') as json_file:
             self.index = json.load(json_file)
 
+    def update_json(self):
+        with open(self.server.index, 'w') as json_file:
+            json.dump(self.index, json_file, indent=2)
+
+    def to_gh_api_url(self, endpoint):
+        parts = self.repo_url.rstrip('/').split('/')
+        owner = parts[-2]
+        repo = parts[-1]
+        api_url = f"https://api.github.com/repos/{owner}/{repo}/{endpoint}"
+        return api_url, f"{owner}/{repo}"
+
     def fetch(self):
         """Fetches the latest release from GitHub. If there is no release, the last commit is retrieved"""
 
@@ -81,11 +92,18 @@ class GitHubApi:
                     self.rt_logger.info(f"New release found for {repo}: {CYAN}{latest_release}{RESET}")
                     previous_version = self.index[self.package.meta.id]["latest"]
                     self.index[self.package.meta.id]["latest"] = latest_release
-                    self.update(
+                    status = self.update(
                         release_type=GitReleaseType.RELEASE,
                         string=latest_release,
                         previous_index_version=previous_version
                     )
+
+                    if not status:
+                        self.rt_logger.warning(
+                            f"The index has a different version than the compose file "
+                            f"(compose: {GREEN}{self.package.meta.version}{RESET}, "
+                            f"index: {YELLOW}{previous_version.replace('v', '')}{RESET})"
+                        )
             else:
                 self.fetch_commit()
         else:
@@ -123,24 +141,20 @@ class GitHubApi:
                     self.rt_logger.info(f"New commit found for {repo}: {CYAN}{latest_commit[:7]}{RESET}")
                     previous_version = self.index[self.package.meta.id]["latest"]
                     self.index[self.package.meta.id]["latest"] = latest_commit
-                    self.update(
+                    status = self.update(
                         release_type=GitReleaseType.COMMIT,
                         string=latest_commit[:7],
                         previous_index_version=previous_version
                     )
+
+                    if not status:
+                        self.rt_logger.warning(
+                            f"The index has a different version than the compose file "
+                            f"(compose: {GREEN}{self.package.meta.version[4:]}{RESET}, "
+                            f"index: {YELLOW}{previous_version[:7]}{RESET})"
+                        )
         else:
             self.rt_logger.error(f"Error while fetching {repo} (Status code {response.status_code})")
-
-    def to_gh_api_url(self, endpoint):
-        parts = self.repo_url.rstrip('/').split('/')
-        owner = parts[-2]
-        repo = parts[-1]
-        api_url = f"https://api.github.com/repos/{owner}/{repo}/{endpoint}"
-        return api_url, f"{owner}/{repo}"
-
-    def update_json(self):
-        with open(self.server.index, 'w') as json_file:
-            json.dump(self.index, json_file, indent=2)
 
     def update(self, release_type: GitReleaseType, string, previous_index_version):
         version = ""
@@ -148,20 +162,21 @@ class GitHubApi:
             case GitReleaseType.COMMIT:
                 version = f"git+{string[:7]}"
                 if version == self.package.meta.version:
-                    logger.info(f"{MAGENTA}routines@git{CRESET}: No update for {self.repo} ({GREEN}{version}{RESET})")
+                    self.rt_logger.info(f"No update for {self.repo} ({GREEN}{version}{RESET})")
                     self.update_json()
-                    return 0
+                    return False
+
             case GitReleaseType.RELEASE:
                 if string.startswith("v"):
                     version = string[1:]
                 else:
                     version = string
                 if version == self.package.meta.version:
-                    logger.info(f"{MAGENTA}routines@git{CRESET}: No update for {self.repo} ({GREEN}{version}{RESET})")
+                    self.rt_logger.info(f"No update for {self.repo} ({GREEN}{version}{RESET})")
                     self.update_json()
-                    return 0
+                    return False
             case _:
-                logger.warning(f"{MAGENTA}routines@git{CRESET}: Invalid release type found for {self.repo} ({release_type})")
+                self.rt_logger.warning(f"Invalid release type found for {self.repo} ({release_type})")
 
         logger.info(
             f"{MAGENTA}routines@git{CRESET}: Updating {self.repo} "
