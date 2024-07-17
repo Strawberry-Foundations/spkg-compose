@@ -92,7 +92,7 @@ class GitHubApi:
                     self.rt_logger.info(f"New release found for {repo}: {CYAN}{latest_release}{RESET}")
                     previous_version = self.index[self.package.meta.id]["latest"]
                     self.index[self.package.meta.id]["latest"] = latest_release
-                    status = self.update(
+                    status = self.pre_update(
                         release_type=GitReleaseType.RELEASE,
                         string=latest_release,
                         previous_index_version=previous_version
@@ -146,7 +146,7 @@ class GitHubApi:
                     self.rt_logger.info(f"New commit found for {repo}: {CYAN}{latest_commit[:7]}{RESET}")
                     previous_version = self.index[self.package.meta.id]["latest"]
                     self.index[self.package.meta.id]["latest"] = latest_commit
-                    status = self.update(
+                    status = self.pre_update(
                         release_type=GitReleaseType.COMMIT,
                         string=latest_commit[:7],
                         previous_index_version=previous_version
@@ -166,7 +166,7 @@ class GitHubApi:
         else:
             self.rt_logger.error(f"Error while fetching {repo} (Status code {response.status_code})")
 
-    def update(self, release_type: GitReleaseType, string, previous_index_version):
+    def pre_update(self, release_type: GitReleaseType, string, previous_index_version):
         version = ""
         match release_type:
             case GitReleaseType.COMMIT:
@@ -225,6 +225,7 @@ class GitHubApi:
         successful_processes = 0
         total_processes = len(success)
 
+        # todo: write if package update was successful for every arch in index.json
         for arch, info in success.items():
             if info["status"]:
                 successful_processes += 1
@@ -232,6 +233,7 @@ class GitHubApi:
             else:
                 logger.warning(
                     f"{MAGENTA}routines@git.build.{info['name']}{CRESET}: Build not succeeded for {CYAN}{arch}{RESET}")
+
         if successful_processes < total_processes:
             self.rollback(
                 compose_old=compose_old,
@@ -289,10 +291,10 @@ class GitHubApi:
             thread = threading.Thread(target=self.build_pkg, args=(server, arch, package, name,))
             threads.append(thread)
             thread.start()
-            time.sleep(2)
+            time.sleep(1)
 
-        # for thread in threads:
-        #    thread.join()
+        for thread in threads:
+            thread.join()
 
         return self.status
 
@@ -300,10 +302,12 @@ class GitHubApi:
         servers = {}
         total_available_servers = 0
 
-        if len(architectures) < 2:
-            suffix = f"architecture {CYAN}{architectures[0]}{RESET}"
+        archs = list(architectures.keys())
+
+        if len(archs) < 2:
+            suffix = f"architecture {CYAN}{archs[0]}{RESET}"
         else:
-            suffix = f"architectures {CYAN}{f'{GRAY},{CYAN} '.join(architectures)}{RESET}"
+            suffix = f"architectures {CYAN}{f'{GRAY},{CYAN} '.join(archs)}{RESET}"
 
         logger.info(f"{MAGENTA}routines@git.build{CRESET}: Checking whether a build server is available for {suffix}")
 
@@ -356,6 +360,13 @@ class GitHubApi:
                     f"{MAGENTA}routines@git.build{CRESET}: No build server for arch '{GREEN}{arch}{RESET}' "
                     f"is currently available"
                 )
+                with open(self.server.index, 'r') as json_file:
+                    index = json.load(json_file)
+
+                with open(self.server.index, 'w') as json_file:
+                    index[self.package.meta.id]["architectures"][arch] = False
+                    self.index[self.package.meta.id]["architectures"][arch] = False
+                    json.dump(index, json_file, indent=2)
 
         if total_available_servers == 0:
             logger.warning(
