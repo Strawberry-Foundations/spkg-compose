@@ -1,7 +1,6 @@
 from spkg_compose import init_dir
-from spkg_compose.server.api.github import gh_check_ratelimit
-from spkg_compose.server.git import fetch_git
 from spkg_compose.server.config import config as _cfg
+from spkg_compose.server.api.github import gh_check_ratelimit, GitHubApi
 from spkg_compose.core.parser import read
 from spkg_compose.utils.colors import *
 from spkg_compose.utils.fmt import calculate_percentage, parse_interval
@@ -160,8 +159,28 @@ class Routines:
             rt_logger.error(f"The API rate limit will be reset on {unix_to_readable(reset)}")
             return 1
 
-        fetch_git(self, rt_logger)
+        self.fetch_git(rt_logger)
         rt_logger.ok(f"Finished checkout")
+
+    def fetch_git(self, rt_logger: RtLogger):
+        for root, _, files in os.walk(self.config.data_dir):
+            for file in files:
+                if file.endswith('.spkg'):
+                    file_path = os.path.join(root, file)
+
+                    data = read(file_path)
+                    package = SpkgBuild(data)
+                    repo_url = package.meta.source
+
+                    if repo_url.startswith("https://github.com"):
+                        git = GitHubApi(
+                            repo_url=repo_url,
+                            api_token=self.config.gh_token,
+                            server=self,
+                            package=package,
+                            file_path=file_path,
+                        )
+                        git.fetch()
 
     def run_routine(self, routine):
         """Executes a routine and checks when the routine should next be executed"""
