@@ -243,10 +243,10 @@ class Server:
                     )
                     _sock.close()
 
-            except Exception as err:
+            except Exception:
                 logger.error(
                     f"{MAGENTA}buildserver@{name}{CRESET}: Build server '{CYAN}{name}{RESET}' is not online! "
-                    f"Please check if the build server is running ({err})"
+                    f"Please check if the build server is running"
                 )
 
         if available_servers == 0:
