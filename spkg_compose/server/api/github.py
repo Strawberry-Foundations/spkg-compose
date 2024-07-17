@@ -13,7 +13,7 @@ import threading
 import time
 
 
-def check_ratelimit(token: str):
+def gh_check_ratelimit(token: str):
     headers = {
         'Accept': 'application/vnd.github.v3+json',
         'Authorization': f'Bearer {token}'
