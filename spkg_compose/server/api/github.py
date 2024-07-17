@@ -1,7 +1,7 @@
 from spkg_compose.core.parser import read
 from spkg_compose.server.client import BuildServerClient
 from spkg_compose.server.yaml import ordered_load, ordered_dump
-from spkg_compose.cli.logger import logger, RtLogger
+from spkg_compose.cli.logger import RtLogger
 from spkg_compose.utils.colors import *
 from spkg_compose.package import SpkgBuild
 from enum import Enum
@@ -346,7 +346,7 @@ class GitHubApi:
                 }
             })
 
-            server = BuildServerClient(self.server.config.raw['build_server'][name]["address"])
+            server = BuildServerClient(self.server.config.raw['build_server'][name]["address"], self.rt_logger)
             server.connect()
             server.auth(
                 token=self.server.config.raw['build_server'][name]["token"],
@@ -383,7 +383,7 @@ class GitHubApi:
                 }
             })
 
-            server = BuildServerClient(self.server.config.raw['build_server'][name]["address"])
+            server = BuildServerClient(self.server.config.raw['build_server'][name]["address"], self.rt_logger)
             server.connect()
             server.auth(
                 token=self.server.config.raw['build_server'][name]["token"],
@@ -419,7 +419,7 @@ class GitHubApi:
                 if not value["tags"].__contains__(arch):
                     continue
 
-                server = BuildServerClient(value["address"])
+                server = BuildServerClient(value["address"], self.rt_logger)
                 server.connect()
                 server.auth(
                     token=self.server.config.raw['build_server'][name]["token"],
