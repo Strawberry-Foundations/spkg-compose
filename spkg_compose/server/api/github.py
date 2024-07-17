@@ -13,6 +13,21 @@ import threading
 import time
 
 
+def check_ratelimit(token: str):
+    headers = {
+        'Accept': 'application/vnd.github.v3+json',
+        'Authorization': f'Bearer {token}'
+    }
+
+    response = requests.get("https://api.github.com/rate_limit", headers=headers)
+    result = response.json()
+    rlimit_limit = result["resources"]["core"]["limit"]
+    rlimit_remaining = result["resources"]["core"]["remaining"]
+    rlimit_reset = result["resources"]["core"]["reset"]
+
+    return rlimit_limit, rlimit_remaining, rlimit_reset
+
+
 class GitReleaseType(Enum):
     COMMIT = 1
     RELEASE = 2
