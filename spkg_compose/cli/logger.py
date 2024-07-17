@@ -100,3 +100,20 @@ class Logger:
 
 
 logger = Logger()
+
+
+class RtLogger:
+    def __init__(self, rt_name: str):
+        self.rt_name = rt_name
+
+    def info(self, message):
+        logger.info(f"{MAGENTA}routines@{self.rt_name}{CRESET}: {message}")
+
+    def ok(self, message):
+        logger.ok(f"{MAGENTA}routines@{self.rt_name}{CRESET}: {message}")
+
+    def warning(self, message):
+        logger.warning(f"{MAGENTA}routines@{self.rt_name}{CRESET}: {message}")
+
+    def error(self, message):
+        logger.error(f"{MAGENTA}routines@{self.rt_name}{CRESET}: {message}")
