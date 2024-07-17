@@ -1,4 +1,4 @@
-from spkg_compose.cli.logger import logger
+from spkg_compose.cli.logger import logger, RtLogger
 from spkg_compose.package import SpkgBuild
 from spkg_compose.server.json import send_json, convert_json_data
 from spkg_compose.utils.colors import *
@@ -7,9 +7,10 @@ import socket
 
 
 class BuildServerClient:
-    def __init__(self, address: str):
+    def __init__(self, address: str, rt_logger: RtLogger):
         self.host, self.port = address.split(":")
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.logger = rt_logger
 
     def connect(self):
         try:
@@ -40,17 +41,15 @@ class BuildServerClient:
 
         if response == "ok":
             if not silent:
-                logger.ok(
-                    f"{MAGENTA}routines@git.build.{server_name}{CRESET}: Authentication successful with server "
-                    f"'{CYAN}{server_name}{RESET}'"
+                self.logger.ok(
+                    message=f"Authentication successful with server '{CYAN}{server_name}{RESET}'",
+                    suffix=f"build.{server_name}"
                 )
 
         elif message["response"] == "invalid_token":
-            logger.error(
-                f"{MAGENTA}routines@git.build{CRESET}: Invalid token for build server '{CYAN}{server_name}{RESET}'!"
-            )
+            self.logger.error(f"Invalid token for build server '{CYAN}{server_name}{RESET}'!", suffix="build")
         else:
-            logger.error(f"{MAGENTA}routines@git.build{CRESET}: Invalid response from build server!")
+            self.logger.error(f"Invalid response from build server!", suffix="build")
 
     def request_slot(self):
         self.send({
@@ -75,22 +74,21 @@ class BuildServerClient:
         response = message["response"]
 
         if response == "accept":
-            logger.info(f"{MAGENTA}routines@git.build.{server_name}{CRESET}: Server accepted build request")
+            self.logger.info(f"Server accepted build request", suffix=f"build.{server_name}")
         else:
-            logger.warning(f"{MAGENTA}routines@git.build.{server_name}{CRESET}: Server did not accepted build request")
+            self.logger.warning(f"Server did not accepted build request", suffix=f"build.{server_name}")
             return False
 
-        logger.info(
-            f"{MAGENTA}routines@git.build.{server_name}{CRESET}: Starting build process ..."
+        self.logger.info(
+            f"Starting build process ...", suffix=f"build.{server_name}"
         )
         message = self.recv()
         response = message["response"]
 
         if response == "success":
             _package = message["package_file"]
-            logger.info(
-                f"{MAGENTA}routines@git.build.{server_name}{CRESET}: Package successfully build as "
-                f"'{CYAN}{_package}{RESET}'"
+            self.logger.info(
+                f"Package successfully build as '{CYAN}{_package}{RESET}'", suffix=f"build.{server_name}"
             )
             return True
         else:
