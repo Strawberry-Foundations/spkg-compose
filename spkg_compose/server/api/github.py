@@ -103,20 +103,27 @@ class GitHubApi:
 
         if response.status_code == 200:
             commits = response.json()
+
             if commits:
                 latest_commit = commits[0]["sha"]
-                if self.index[self.package.meta.id]["latest"] == latest_commit:
-                    logger.info(f"{MAGENTA}routines@git{CRESET}: No new commit for {repo} ({GREEN}{latest_commit[:7]}{RESET})")
-                    return 0
 
-                logger.info(f"{MAGENTA}routines@git{CRESET}: Latest commit for {repo}: {CYAN}{latest_commit[:7]}{RESET}")
-                previous_version = self.index[self.package.meta.id]["latest"]
-                self.index[self.package.meta.id]["latest"] = latest_commit
-                self.update(
-                    release_type=GitReleaseType.COMMIT,
-                    string=latest_commit[:7],
-                    previous_index_version=previous_version
-                )
+                # If commit hash in index is empty
+                if self.index[self.package.meta.id]["latest"] == "":
+                    self.rt_logger.info(f"Updating index version for {repo} to {GREEN}{latest_commit[:7]}{RESET}")
+                    self.index[self.package.meta.id]["latest"] = latest_commit
+
+                elif self.index[self.package.meta.id]["latest"] == latest_commit:
+                    self.rt_logger.info(f"No new commit for {repo} ({GREEN}{latest_commit[:7]}{RESET})")
+
+                else:
+                    self.rt_logger.info(f"Latest commit for {repo}: {CYAN}{latest_commit[:7]}{RESET}")
+                    previous_version = self.index[self.package.meta.id]["latest"]
+                    self.index[self.package.meta.id]["latest"] = latest_commit
+                    self.update(
+                        release_type=GitReleaseType.COMMIT,
+                        string=latest_commit[:7],
+                        previous_index_version=previous_version
+                    )
         else:
             logger.error(f"Error while fetching {repo} (Status code {response.status_code})")
 
