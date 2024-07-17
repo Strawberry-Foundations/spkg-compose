@@ -98,16 +98,19 @@ class GitHubApi:
                         previous_index_version=previous_version
                     )
 
-                    if not status:
-                        self.rt_logger.warning(
-                            f"The index has a different version than the compose file "
-                            f"(compose: {GREEN}{self.package.meta.version}{RESET}, "
-                            f"index: {YELLOW}{previous_version.replace('v', '')}{RESET})"
-                        )
-                        self.rt_logger.warning(
-                            "This should not happen. Either the version was changed manually or the "
-                            "update process was interrupted."
-                        )
+                    match status:
+                        case 255:
+                            self.rt_logger.warning(
+                                f"The index has a different version than the compose file "
+                                f"(compose: {GREEN}{self.package.meta.version}{RESET}, "
+                                f"index: {YELLOW}{previous_version.replace('v', '')}{RESET})"
+                            )
+                            self.rt_logger.warning(
+                                "This should not happen. Either the version was changed manually or the "
+                                "update process was interrupted."
+                            )
+                        case 2:
+                            self.rt_logger.warning("No build server available")
             else:
                 self.fetch_commit()
         else:
@@ -151,16 +154,19 @@ class GitHubApi:
                         previous_index_version=previous_version
                     )
 
-                    if not status:
-                        self.rt_logger.warning(
-                            f"The index has a different version than the compose file "
-                            f"(compose: {GREEN}{self.package.meta.version[4:]}{RESET}, "
-                            f"index: {YELLOW}{previous_version[:7]}{RESET})"
-                        )
-                        self.rt_logger.warning(
-                            "This should not happen. Either the version was changed manually or the "
-                            "update process was interrupted."
-                        )
+                    match status:
+                        case 255:
+                            self.rt_logger.warning(
+                                f"The index has a different version than the compose file "
+                                f"(compose: {GREEN}{self.package.meta.version[4:]}{RESET}, "
+                                f"index: {YELLOW}{previous_version[:7]}{RESET})"
+                            )
+                            self.rt_logger.warning(
+                                "This should not happen. Either the version was changed manually or the "
+                                "update process was interrupted."
+                            )
+                        case 2:
+                            self.rt_logger.warning("No build server available")
         else:
             self.rt_logger.error(f"Error while fetching {repo} (Status code {response.status_code})")
 
@@ -172,7 +178,7 @@ class GitHubApi:
                 if version == self.package.meta.version:
                     self.rt_logger.info(f"No update for {self.repo} ({GREEN}{version}{RESET})")
                     self.update_json()
-                    return False
+                    return 255
 
             case GitReleaseType.RELEASE:
                 if string.startswith("v"):
@@ -182,13 +188,12 @@ class GitHubApi:
                 if version == self.package.meta.version:
                     self.rt_logger.info(f"No update for {self.repo} ({GREEN}{version}{RESET})")
                     self.update_json()
-                    return False
+                    return 255
             case _:
                 self.rt_logger.warning(f"Invalid release type found for {self.repo} ({release_type})")
 
-        logger.info(
-            f"{MAGENTA}routines@git{CRESET}: Updating {self.repo} "
-            f"({YELLOW}{self.package.meta.version}{RESET}{GRAY}->{GREEN}{version}{RESET})"
+        self.rt_logger.info(
+            f"Updating {self.repo} ({YELLOW}{self.package.meta.version}{RESET}{GRAY}->{GREEN}{version}{RESET})"
         )
 
         # Check if build server is available
@@ -196,7 +201,7 @@ class GitHubApi:
 
         if not servers:
             logger.warning(f"{MAGENTA}routines@git.build{CRESET}: Canceling update process")
-            return 0
+            return 2
 
         self.update_json()
 
