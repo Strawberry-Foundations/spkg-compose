@@ -214,7 +214,7 @@ class GitHubApi:
         servers = self.is_buildserver_available(self.index[self.package.meta.id]["architectures"])
 
         if not servers:
-            logger.warning(f"{MAGENTA}routines@git.build{CRESET}: Canceling update process")
+            self.rt_logger.warning("Canceling update process", suffix="build")
             return 2
 
         self.update_json()
@@ -237,7 +237,7 @@ class GitHubApi:
         try:
             success = self.update_package(version=version, servers=servers)
         except:
-            logger.error(f"{MAGENTA}routines@git.build{CRESET}: Something went wrong while updating package")
+            self.rt_logger.error("Something went wrong while updating package", suffix="build")
             success = False
 
         successful_processes = 0
@@ -247,10 +247,10 @@ class GitHubApi:
         for arch, info in success.items():
             if info["status"]:
                 successful_processes += 1
-                logger.ok(f"{MAGENTA}routines@git.build.{info['name']}{CRESET}: Build succeeded for {CYAN}{arch}{RESET}")
+                self.rt_logger.ok(f"Build succeeded for {CYAN}{arch}{RESET}", suffix=f"build.{info['name']}")
             else:
-                logger.warning(
-                    f"{MAGENTA}routines@git.build.{info['name']}{CRESET}: Build not succeeded for {CYAN}{arch}{RESET}"
+                self.rt_logger.warning(
+                    f"Build not succeeded for {CYAN}{arch}{RESET}", suffix=f"build.{info['name']}"
                 )
                 self.index[self.package.meta.id]["architectures"][arch] = False
                 self.update_json()
@@ -285,7 +285,7 @@ class GitHubApi:
         servers = self.is_buildserver_available({arch: False})
 
         if not servers:
-            logger.warning(f"{MAGENTA}routines@git.build{CRESET}: Canceling update process")
+            self.rt_logger.warning(f"Canceling update process", suffix="build")
             return 2
 
         # START FROM HERE
@@ -293,20 +293,19 @@ class GitHubApi:
         try:
             success = self.update_package_single_arch(version=version, servers=servers)
         except:
-            logger.error(f"{MAGENTA}routines@git.build{CRESET}: Something went wrong while updating package")
+            self.rt_logger.error(f"Something went wrong while updating package" , suffix="build")
             success = False
 
         # todo: write if package update was successful for every arch in index.json
         for arch, info in success.items():
             if info["status"]:
-                logger.ok(
-                    f"{MAGENTA}routines@git.build.{info['name']}{CRESET}: Build succeeded for {CYAN}{arch}{RESET}")
-
+                self.rt_logger.ok(f"Build succeeded for {CYAN}{arch}{RESET}", suffix=f"build.{info['name']}")
                 self.index[self.package.meta.id]["architectures"][arch] = True
                 self.update_json()
             else:
-                logger.warning(
-                    f"{MAGENTA}routines@git.build.{info['name']}{CRESET}: Build not succeeded for {CYAN}{arch}{RESET}"
+                self.rt_logger.warning(
+                    message=f"Build not succeeded for {CYAN}{arch}{RESET}",
+                    suffix=f"build.{info['name']}"
                 )
                 self.index[self.package.meta.id]["architectures"][arch] = False
                 self.update_json()
@@ -335,9 +334,9 @@ class GitHubApi:
 
         for arch, info in servers.items():
             name = info["name"]
-            logger.info(
-                f"{MAGENTA}routines@git.build.{name}{CRESET}: Requesting build process on server '{CYAN}{name}{RESET}' "
-                f"for arch '{CYAN}{arch}{RESET}' for package {GREEN}{self.package.meta.id}-{version}{RESET}"
+            self.rt_logger.info(
+                f"Requesting build process on server '{CYAN}{name}{RESET}' for arch '{CYAN}{arch}{RESET}' for "
+                f"package {GREEN}{self.package.meta.id}-{version}{RESET}", suffix=f"build.{name}"
             )
 
             self.status.update({
@@ -372,9 +371,9 @@ class GitHubApi:
 
         for arch, info in servers.items():
             name = info["name"]
-            logger.info(
-                f"{MAGENTA}routines@git.build.{name}{CRESET}: Requesting build process on server '{CYAN}{name}{RESET}' "
-                f"for arch '{CYAN}{arch}{RESET}' for package {GREEN}{self.package.meta.id}-{version}{RESET}"
+            self.rt_logger.info(
+                f"Requesting build process on server '{CYAN}{name}{RESET}' for arch '{CYAN}{arch}{RESET}' for "
+                f"package {GREEN}{self.package.meta.id}-{version}{RESET}", suffix=f"build.{name}"
             )
 
             self.status.update({
@@ -411,7 +410,7 @@ class GitHubApi:
         else:
             suffix = f"architectures {CYAN}{f'{GRAY},{CYAN} '.join(archs)}{RESET}"
 
-        logger.info(f"{MAGENTA}routines@git.build{CRESET}: Checking whether a build server is available for {suffix}")
+        self.rt_logger.info(f"Checking whether a build server is available for {suffix}", suffix="build")
 
         for arch in architectures:
             available_servers = 0
@@ -430,9 +429,8 @@ class GitHubApi:
 
                 status = server.request_slot()
                 if status:
-                    logger.ok(
-                        f"{MAGENTA}routines@git.build{CRESET}: Server '{CYAN}{name}{RESET}' for arch "
-                        f"'{GREEN}{arch}{RESET}' is free"
+                    self.rt_logger.ok(
+                        f"Server '{CYAN}{name}{RESET}' for arch '{GREEN}{arch}{RESET}' is free", suffix="build"
                     )
                     available_servers += 1
                     total_available_servers += 1
@@ -445,9 +443,8 @@ class GitHubApi:
                         }
                     })
                 else:
-                    logger.warning(
-                        f"{MAGENTA}routines@git.build{CRESET}: Server '{CYAN}{name}{RESET}' for arch "
-                        f"'{GREEN}{arch}{RESET}' is full"
+                    self.rt_logger.warning(
+                        f"Server '{CYAN}{name}{RESET}' for arch '{GREEN}{arch}{RESET}' is full", suffix="build"
                     )
                     server.disconnect()
                     servers.update({
@@ -458,9 +455,8 @@ class GitHubApi:
                     })
 
             if available_servers == 0:
-                logger.warning(
-                    f"{MAGENTA}routines@git.build{CRESET}: No build server for arch '{GREEN}{arch}{RESET}' "
-                    f"is currently available"
+                self.rt_logger.warning(
+                    f"No build server for arch '{GREEN}{arch}{RESET}' is currently available", suffix="build"
                 )
                 with open(self.server.index, 'r') as json_file:
                     index = json.load(json_file)
@@ -471,9 +467,8 @@ class GitHubApi:
                     json.dump(index, json_file, indent=2)
 
         if total_available_servers == 0:
-            logger.warning(
-                f"{MAGENTA}routines@git.build{CRESET}: There is currently no build server available for any of "
-                f"the available architectures."
+            self.rt_logger.warning(
+                f"There is currently no build server available for any of the available architectures.", suffix="build"
             )
             return None
 
@@ -490,9 +485,9 @@ class GitHubApi:
                 new_version = f"git+{self.index[self.package.meta.id]['latest'][:7]}"
                 old_version = f"git+{index_version[:7]}"
 
-        logger.warning(
-            f"{MAGENTA}routines@git.build{CRESET}: Something went wrong - Rolling back previous changes "
-            f"({GREEN}{new_version}{RESET}{GRAY}->{YELLOW}{old_version}{RESET})"
+        self.rt_logger.warning(
+            f"Something went wrong - Rolling back previous changes "
+            f"({GREEN}{new_version}{RESET}{GRAY}->{YELLOW}{old_version}{RESET})", suffix="build"
         )
         with open(self.file_path, 'w') as file:
             file.write(compose_old)
