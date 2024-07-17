@@ -76,6 +76,15 @@ class GitHubApi:
             if releases:
                 latest_release = releases[0]["tag_name"]
 
+                for arch, up_to_date in self.index[self.package.meta.id]["architectures"].items():
+                    if not up_to_date:
+                        self.rt_logger.warning(
+                            f"Package '{CYAN}{self.package.meta.id}{RESET}' for arch '{GREEN}{arch}{RESET}' "
+                            f"was not updated correctly during the last update"
+                        )
+
+                        self.pre_update_single_arch(arch=arch, release_type=GitReleaseType.RELEASE)
+
                 # If version in index is empty
                 if self.index[self.package.meta.id]["latest"] == "":
                     self.rt_logger.info(f"Updating index version for {repo} to {GREEN}{latest_release}{RESET}")
@@ -131,6 +140,15 @@ class GitHubApi:
 
             if commits:
                 latest_commit = commits[0]["sha"]
+
+                for arch, up_to_date in self.index[self.package.meta.id]["architectures"].items():
+                    if not up_to_date:
+                        self.rt_logger.warning(
+                            f"Package '{CYAN}{self.package.meta.id}{RESET}' for arch '{GREEN}{arch}{RESET}' "
+                            f"was not updated correctly during the last update"
+                        )
+
+                        self.pre_update_single_arch(arch=arch, release_type=GitReleaseType.COMMIT)
 
                 # If commit hash in index is empty
                 if self.index[self.package.meta.id]["latest"] == "":
@@ -232,7 +250,10 @@ class GitHubApi:
                 logger.ok(f"{MAGENTA}routines@git.build.{info['name']}{CRESET}: Build succeeded for {CYAN}{arch}{RESET}")
             else:
                 logger.warning(
-                    f"{MAGENTA}routines@git.build.{info['name']}{CRESET}: Build not succeeded for {CYAN}{arch}{RESET}")
+                    f"{MAGENTA}routines@git.build.{info['name']}{CRESET}: Build not succeeded for {CYAN}{arch}{RESET}"
+                )
+                self.index[self.package.meta.id]["architectures"][arch] = False
+                self.update_json()
 
         if successful_processes < total_processes:
             self.rollback(
@@ -241,6 +262,51 @@ class GitHubApi:
                 index_version=previous_index_version,
                 release_type=release_type
             )
+
+    def pre_update_single_arch(self, arch: str, release_type: GitReleaseType):
+        string = self.index[self.package.meta.id]["latest"]
+        version = ""
+        match release_type:
+            case GitReleaseType.COMMIT:
+                version = f"git+{string[:7]}"
+
+            case GitReleaseType.RELEASE:
+                if string.startswith("v"):
+                    version = string[1:]
+                else:
+                    version = string
+
+        self.rt_logger.info(
+            f"Updating {self.repo} for arch '{GREEN}{arch}{RESET}' "
+            f"({YELLOW}{self.package.meta.version}{RESET}{GRAY}->{GREEN}{version}{RESET})"
+        )
+
+        # Check if build server is available
+        servers = self.is_buildserver_available({arch: False})
+
+        if not servers:
+            logger.warning(f"{MAGENTA}routines@git.build{CRESET}: Canceling update process")
+            return 2
+
+        # START FROM HERE
+        # Update package
+        try:
+            success = self.update_package_single_arch(version=version, servers=servers)
+        except:
+            logger.error(f"{MAGENTA}routines@git.build{CRESET}: Something went wrong while updating package")
+            success = False
+
+        # todo: write if package update was successful for every arch in index.json
+        for arch, info in success.items():
+            if info["status"]:
+                logger.ok(
+                    f"{MAGENTA}routines@git.build.{info['name']}{CRESET}: Build succeeded for {CYAN}{arch}{RESET}")
+            else:
+                logger.warning(
+                    f"{MAGENTA}routines@git.build.{info['name']}{CRESET}: Build not succeeded for {CYAN}{arch}{RESET}"
+                )
+                self.index[self.package.meta.id]["architectures"][arch] = False
+                self.update_json()
 
     def update_specfile(self, version):
         with open(self.index[self.package.meta.id]["specfile"], 'r') as file:
@@ -295,6 +361,39 @@ class GitHubApi:
 
         for thread in threads:
             thread.join()
+
+        return self.status
+
+    def update_package_single_arch(self, version, servers):
+        self.status = {}
+
+        for arch, info in servers.items():
+            name = info["name"]
+            logger.info(
+                f"{MAGENTA}routines@git.build.{name}{CRESET}: Requesting build process on server '{CYAN}{name}{RESET}' "
+                f"for arch '{CYAN}{arch}{RESET}' for package {GREEN}{self.package.meta.id}-{version}{RESET}"
+            )
+
+            self.status.update({
+                arch: {
+                    "name": name,
+                    "status": False
+                }
+            })
+
+            server = BuildServerClient(self.server.config.raw['build_server'][name]["address"])
+            server.connect()
+            server.auth(
+                token=self.server.config.raw['build_server'][name]["token"],
+                server_name=name,
+            )
+
+            data = read(self.file_path)
+            package = SpkgBuild(data)
+
+            _status = server.update_pkg(self, package, name)
+            server.disconnect()
+            self.status[arch]["status"] = True
 
         return self.status
 
