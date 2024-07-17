@@ -163,7 +163,7 @@ class Routines:
             This routine checks whether the GitHub repositories of the packages in this repository
             have a new release or a new commit
         """
-        rt_logger.info(f"Starting git fetch")
+        rt_logger.info(f"Starting checkout")
 
         limit, remaining, reset = gh_check_ratelimit(self.server.config.gh_token)
 
@@ -178,7 +178,7 @@ class Routines:
             return 1
 
         fetch_git(self)
-        rt_logger.ok(f"Finished git fetch")
+        rt_logger.ok(f"Finished checkout")
 
     def run_routine(self, routine):
         """Executes a routine and checks when the routine should next be executed"""
