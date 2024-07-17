@@ -48,6 +48,11 @@ class Routines:
                     return rt.gh_checkout
                 case "indexing":
                     return rt.indexing
+                case _:
+                    logger.warning(
+                        f"Invalid {YELLOW}{BOLD}@conflict{CRESET} name for {MAGENTA}@routine{RESET} "
+                        f"(got '{MAGENTA}{_conflicts}{RESET}')"
+                    )
 
         def _set_rt(_rt, state: bool):
             match _rt:
@@ -55,12 +60,13 @@ class Routines:
                     rt.gh_checkout = state
                 case "indexing":
                     rt.indexing = state
+                case _:
+                    logger.warning(f"Invalid function for {MAGENTA}@routine{RESET} (got '{MAGENTA}{_rt}{RESET}')")
 
         def decorator(func):
             def wrapper(self, *args, **kwargs):
                 _set_rt(func.__name__, True)
 
-                print(f"{conflicts}: {_get_rt(conflicts)}")
                 if conflicts is not None:
                     if _get_rt(conflicts):
                         logger.routine(
