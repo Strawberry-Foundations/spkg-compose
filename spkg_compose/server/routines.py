@@ -1,4 +1,6 @@
+from spkg_compose import init_dir
 from spkg_compose.server.git import fetch_git
+from spkg_compose.server.config import config as _cfg
 from spkg_compose.core.parser import read
 from spkg_compose.utils.colors import *
 from spkg_compose.utils.fmt import calculate_percentage, parse_interval
@@ -27,6 +29,9 @@ rt = Running()
 class Routines:
     def __init__(self, server):
         self.server = server
+        self.config = _cfg
+        self.index = f"{init_dir}/data/index.json"
+
         self.processes = {
             "indexing": self.indexing,
             "git_checkout": self.gh_checkout
