@@ -42,11 +42,14 @@ class GitHubApi:
         self.server = server
         self.package = package
         self.file_path = file_path
+        self.rt_logger = rt_logger
 
         with open(self.server.index, 'r') as json_file:
             self.index = json.load(json_file)
 
     def fetch(self):
+        """Fetches the latest release from GitHub. If there is no release, the last commit is retrieved"""
+
         api_url, repo = self.to_gh_api_url("releases")
         headers = {
             "Accept": "application/vnd.github.v3+json",
@@ -58,26 +61,37 @@ class GitHubApi:
 
         if response.status_code == 200:
             releases = response.json()
+
             if releases:
                 latest_release = releases[0]["tag_name"]
-                if self.index[self.package.meta.id]["latest"] == latest_release:
-                    logger.info(f"{MAGENTA}routines@git{CRESET}: No new release for {repo} ({GREEN}{latest_release}{RESET})")
-                    return 0
 
-                logger.info(f"{MAGENTA}routines@git{CRESET}: Release found for {repo}: {CYAN}{latest_release}{RESET}")
-                previous_version = self.index[self.package.meta.id]["latest"]
-                self.index[self.package.meta.id]["latest"] = latest_release
-                self.update(
-                    release_type=GitReleaseType.RELEASE,
-                    string=latest_release,
-                    previous_index_version=previous_version
-                )
+                # If version in index is empty
+                if self.index[self.package.meta.id]["latest"] == "":
+                    self.rt_logger.info(f"Updating index version for {repo} to {GREEN}{latest_release}{RESET}")
+                    self.index[self.package.meta.id]["latest"] = latest_release
+
+                # If version in index matches latest git version
+                elif self.index[self.package.meta.id]["latest"] == latest_release:
+                    self.rt_logger.info(f"No new release for {repo} ({GREEN}{latest_release}{RESET})")
+
+                # If version in index does not matches latest git version
+                else:
+                    self.rt_logger.info(f"Release found for {repo}: {CYAN}{latest_release}{RESET}")
+                    previous_version = self.index[self.package.meta.id]["latest"]
+                    self.index[self.package.meta.id]["latest"] = latest_release
+                    self.update(
+                        release_type=GitReleaseType.RELEASE,
+                        string=latest_release,
+                        previous_index_version=previous_version
+                    )
             else:
                 self.fetch_commit()
         else:
             logger.error(f"Error while fetching {repo} (Status code {response.status_code})")
 
     def fetch_commit(self):
+        """Fetches the latest commit from GitHub."""
+
         api_url, repo = self.to_gh_api_url("commits")
         headers = {
             "Accept": "application/vnd.github.v3+json",
