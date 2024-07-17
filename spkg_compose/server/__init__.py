@@ -2,24 +2,14 @@ from spkg_compose import SERVER_VERSION, init_dir
 from spkg_compose.server.config import config as _cfg
 from spkg_compose.server.git import fetch_git
 from spkg_compose.server.json import send_json, convert_json_data
-from spkg_compose.core.parser import read
 from spkg_compose.server.routines import Routines
 from spkg_compose.utils.colors import *
-from spkg_compose.utils.time import unix_to_readable, convert_time
-from spkg_compose.utils.fmt import calculate_percentage
-from spkg_compose.cli.logger import logger, current_time
-from spkg_compose.package import SpkgBuild
+from spkg_compose.cli.logger import logger
 
-from datetime import datetime, timedelta
 
-import os
 import sys
-import json
-import time
 import threading
-import requests
 import socket
-import yaml
 
 
 class Server:
@@ -109,7 +99,7 @@ class Server:
                     f"Registering routine '{CYAN}{routine['name']}{RESET}' ({i}/{len_routines}), "
                     f"runs every {GREEN}{routine['every']}{RESET}"
                 )
-                thread = threading.Thread(target=self.run_routine, args=(routine,))
+                thread = threading.Thread(target=self.routines.run_routine, args=(routine,))
                 thread.daemon = True
                 threads.append(thread)
                 thread.start()
