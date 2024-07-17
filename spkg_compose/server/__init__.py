@@ -1,6 +1,5 @@
 from spkg_compose import SERVER_VERSION, init_dir
 from spkg_compose.server.config import config as _cfg
-from spkg_compose.server.git import fetch_git
 from spkg_compose.server.json import send_json, convert_json_data
 from spkg_compose.server.routines import Routines
 from spkg_compose.utils.colors import *
