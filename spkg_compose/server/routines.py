@@ -17,23 +17,6 @@ import time
 import yaml
 
 
-class RtLogger:
-    def __init__(self, rt_name: str):
-        self.rt_name = rt_name
-
-    def info(self, message):
-        logger.info(f"{MAGENTA}routines@{self.rt_name}{CRESET}: {message}")
-
-    def ok(self, message):
-        logger.ok(f"{MAGENTA}routines@{self.rt_name}{CRESET}: {message}")
-
-    def warning(self, message):
-        logger.warning(f"{MAGENTA}routines@{self.rt_name}{CRESET}: {message}")
-
-    def error(self, message):
-        logger.error(f"{MAGENTA}routines@{self.rt_name}{CRESET}: {message}")
-
-
 class Running:
     def __init__(self):
         self.indexing = False
@@ -177,7 +160,7 @@ class Routines:
             rt_logger.error(f"The API rate limit will be reset on {unix_to_readable(reset)}")
             return 1
 
-        fetch_git(self)
+        fetch_git(self, rt_logger)
         rt_logger.ok(f"Finished checkout")
 
     def run_routine(self, routine):
