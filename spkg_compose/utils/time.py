@@ -1,5 +1,12 @@
 import datetime
 
+from datetime import datetime as dt
+
+
+def current_time(time_fmt: str) -> str:
+    local = dt.now()
+    return local.strftime(time_fmt)
+
 
 def unix_to_readable(unix_time):
     readable_time = datetime.datetime.fromtimestamp(unix_time).strftime('%Y-%m-%d %H:%M:%S')
