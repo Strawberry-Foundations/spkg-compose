@@ -89,7 +89,7 @@ class GitHubApi:
             else:
                 self.fetch_commit()
         else:
-            logger.error(f"Error while fetching {repo} (Status code {response.status_code})")
+            self.rt_logger.error(f"Error while fetching {repo} (Status code {response.status_code})")
 
     def fetch_commit(self):
         """Fetches the latest commit from GitHub."""
@@ -129,7 +129,7 @@ class GitHubApi:
                         previous_index_version=previous_version
                     )
         else:
-            logger.error(f"Error while fetching {repo} (Status code {response.status_code})")
+            self.rt_logger.error(f"Error while fetching {repo} (Status code {response.status_code})")
 
     def to_gh_api_url(self, endpoint):
         parts = self.repo_url.rstrip('/').split('/')
