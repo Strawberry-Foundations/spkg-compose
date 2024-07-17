@@ -186,7 +186,7 @@ class Routines:
             return 1
 
         fetch_git(self)
-        rt_logger.info(f"Finished git fetch")
+        rt_logger.ok(f"Finished git fetch")
 
     def run_routine(self, routine):
         """Executes a routine and checks when the routine should next be executed"""
