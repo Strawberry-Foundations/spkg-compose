@@ -12,7 +12,15 @@ class BuildServerClient:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def connect(self):
-        self.socket.connect((self.host, int(self.port)))
+        try:
+            self.socket.connect((self.host, int(self.port)))
+            return True
+        except:
+            logger.warning(
+                f"{MAGENTA}buildserver@{self.host}{CRESET}: Connection failed while trying to connect to "
+                f"{MAGENTA}{self.host}:{self.port}{RESET}"
+            )
+            return False
 
     def send(self, data):
         self.socket.send(send_json(data).encode("utf8"))
