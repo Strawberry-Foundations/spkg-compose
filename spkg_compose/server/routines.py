@@ -60,6 +60,7 @@ class Routines:
             def wrapper(self, *args, **kwargs):
                 _set_rt(func.__name__, True)
 
+                print(f"{conflicts}: {_get_rt(conflicts)}")
                 if conflicts is not None:
                     if _get_rt(conflicts):
                         logger.routine(
@@ -84,7 +85,7 @@ class Routines:
 
         return decorator
 
-    @routine(conflicts="gh_checkout")
+    @routine(conflicts="checkout")
     def indexing(self, rt_logger: RtLogger):
         """-- Routine for indexing
             This routine checks for new *.spkg files. If there are any new files, this routine will
