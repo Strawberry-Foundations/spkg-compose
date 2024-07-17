@@ -69,10 +69,12 @@ class GitHubApi:
                 if self.index[self.package.meta.id]["latest"] == "":
                     self.rt_logger.info(f"Updating index version for {repo} to {GREEN}{latest_release}{RESET}")
                     self.index[self.package.meta.id]["latest"] = latest_release
+                    self.update_json()
 
                 # If version in index matches latest git version
                 elif self.index[self.package.meta.id]["latest"] == latest_release:
                     self.rt_logger.info(f"No new release for {repo} ({GREEN}{latest_release}{RESET})")
+                    self.update_json()
 
                 # If version in index does not matches latest git version
                 else:
@@ -111,9 +113,11 @@ class GitHubApi:
                 if self.index[self.package.meta.id]["latest"] == "":
                     self.rt_logger.info(f"Updating index version for {repo} to {GREEN}{latest_commit[:7]}{RESET}")
                     self.index[self.package.meta.id]["latest"] = latest_commit
+                    self.update_json()
 
                 elif self.index[self.package.meta.id]["latest"] == latest_commit:
                     self.rt_logger.info(f"No new commit for {repo} ({GREEN}{latest_commit[:7]}{RESET})")
+                    self.update_json()
 
                 else:
                     self.rt_logger.info(f"Latest commit for {repo}: {CYAN}{latest_commit[:7]}{RESET}")
