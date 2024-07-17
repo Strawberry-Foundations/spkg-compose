@@ -3,11 +3,6 @@ from enum import Enum
 from datetime import datetime
 
 
-def current_time(time_fmt: str) -> str:
-    local = datetime.now()
-    return local.strftime(time_fmt)
-
-
 class LogFormat:
     def __init__(self):
         self.info = f"{C_RESET}{BOLD}[%<time>%] {GREEN}[%<levelname>%]{C_RESET}    [%<message>%]"
