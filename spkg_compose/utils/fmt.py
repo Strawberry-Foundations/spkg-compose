@@ -27,7 +27,7 @@ def calculate_percentage(total, value):
     return f"{color}{value} ({percentage:.2f}%) {reset_color}"
 
 
-def parse_interval(self, interval_str):
+def parse_interval(interval_str):
     """Parse time interval from routine config"""
     amount = int(interval_str[:-1])
     unit = interval_str[-1]
