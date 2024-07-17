@@ -107,8 +107,8 @@ class RtLogger:
         self.rt_name = rt_name
 
     def info(self, message, suffix: str = None):
-        if suffix: s
-        uffix = f".{suffix}"
+        if suffix:
+            suffix = f".{suffix}"
         logger.info(f"{MAGENTA}routines@{self.rt_name}{suffix}{CRESET}: {message}")
 
     def ok(self, message, suffix: str = None):
