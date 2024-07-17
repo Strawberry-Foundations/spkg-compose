@@ -1,7 +1,7 @@
 from spkg_compose.core.parser import read
 from spkg_compose.server.client import BuildServerClient
 from spkg_compose.server.yaml import ordered_load, ordered_dump
-from spkg_compose.cli.logger import logger
+from spkg_compose.cli.logger import logger, RtLogger
 from spkg_compose.utils.colors import *
 from spkg_compose.package import SpkgBuild
 from enum import Enum
@@ -34,7 +34,7 @@ class GitReleaseType(Enum):
 
 
 class GitHubApi:
-    def __init__(self, repo_url: str, api_token: str, server, package: SpkgBuild, file_path):
+    def __init__(self, repo_url: str, api_token: str, server, package: SpkgBuild, file_path, rt_logger: RtLogger):
         self.status = {}
         self.repo_url = repo_url
         self.repo = ""
