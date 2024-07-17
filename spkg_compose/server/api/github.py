@@ -104,6 +104,10 @@ class GitHubApi:
                             f"(compose: {GREEN}{self.package.meta.version}{RESET}, "
                             f"index: {YELLOW}{previous_version.replace('v', '')}{RESET})"
                         )
+                        self.rt_logger.warning(
+                            "This should not happen. Either the version was changed manually or the "
+                            "update process was interrupted."
+                        )
             else:
                 self.fetch_commit()
         else:
@@ -152,6 +156,10 @@ class GitHubApi:
                             f"The index has a different version than the compose file "
                             f"(compose: {GREEN}{self.package.meta.version[4:]}{RESET}, "
                             f"index: {YELLOW}{previous_version[:7]}{RESET})"
+                        )
+                        self.rt_logger.warning(
+                            "This should not happen. Either the version was changed manually or the "
+                            "update process was interrupted."
                         )
         else:
             self.rt_logger.error(f"Error while fetching {repo} (Status code {response.status_code})")
