@@ -179,6 +179,7 @@ class Routines:
                             server=self,
                             package=package,
                             file_path=file_path,
+                            rt_logger=rt_logger
                         )
                         git.fetch()
 
