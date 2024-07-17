@@ -78,7 +78,7 @@ class GitHubApi:
 
                 # If version in index does not matches latest git version
                 else:
-                    self.rt_logger.info(f"Release found for {repo}: {CYAN}{latest_release}{RESET}")
+                    self.rt_logger.info(f"New release found for {repo}: {CYAN}{latest_release}{RESET}")
                     previous_version = self.index[self.package.meta.id]["latest"]
                     self.index[self.package.meta.id]["latest"] = latest_release
                     self.update(
@@ -120,7 +120,7 @@ class GitHubApi:
                     self.update_json()
 
                 else:
-                    self.rt_logger.info(f"Latest commit for {repo}: {CYAN}{latest_commit[:7]}{RESET}")
+                    self.rt_logger.info(f"New commit found for {repo}: {CYAN}{latest_commit[:7]}{RESET}")
                     previous_version = self.index[self.package.meta.id]["latest"]
                     self.index[self.package.meta.id]["latest"] = latest_commit
                     self.update(
