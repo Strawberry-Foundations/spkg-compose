@@ -1,4 +1,5 @@
 from spkg_compose import init_dir
+from spkg_compose.server.api.github import check_ratelimit
 from spkg_compose.server.git import fetch_git
 from spkg_compose.server.config import config as _cfg
 from spkg_compose.core.parser import read
@@ -13,7 +14,6 @@ from datetime import datetime
 import os
 import json
 import time
-import requests
 import yaml
 
 
@@ -164,25 +164,17 @@ class Routines:
             have a new release or a new commit
         """
         rt_logger.info(f"Starting git fetch")
-        headers = {
-            'Accept': 'application/vnd.github.v3+json',
-            'Authorization': f'Bearer {self.server.config.gh_token}'
-        }
 
-        response = requests.get("https://api.github.com/rate_limit", headers=headers)
-        result = response.json()
-        rlimit_limit = result["resources"]["core"]["limit"]
-        rlimit_remaining = result["resources"]["core"]["remaining"]
-        rlimit_reset = result["resources"]["core"]["reset"]
+        limit, remaining, reset = check_ratelimit(self.server.config.gh_token)
 
         rt_logger.info(
-            f"{calculate_percentage(rlimit_limit, rlimit_remaining)} of {rlimit_limit} requests available "
-            f"(Will reset on {unix_to_readable(rlimit_reset)})"
+            f"{calculate_percentage(limit, remaining)} of {limit} requests available "
+            f"(Will reset on {unix_to_readable(reset)})"
         )
 
-        if rlimit_remaining == 0:
+        if remaining == 0:
             rt_logger.error(f"API rate limit exceeded. Canceling routine")
-            rt_logger.error(f"The API rate limit will be reset on {unix_to_readable(rlimit_reset)}")
+            rt_logger.error(f"The API rate limit will be reset on {unix_to_readable(reset)}")
             return 1
 
         fetch_git(self)
