@@ -1,6 +1,6 @@
 from spkg_compose.utils.colors import *
+from spkg_compose.utils.time import current_time
 from enum import Enum
-from datetime import datetime
 
 
 class LogFormat:
