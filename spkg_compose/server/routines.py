@@ -157,7 +157,7 @@ class Routines:
         limit, remaining, reset = gh_check_ratelimit(self.server.config.gh_token)
 
         rt_logger.info(
-            f"{calculate_percentage(limit, remaining)} of {limit} requests available "
+            f"{calculate_percentage(limit, remaining)} of {GREEN}{limit}{RESET} requests available "
             f"(Will reset on {unix_to_readable(reset)})"
         )
 
