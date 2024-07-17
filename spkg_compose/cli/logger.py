@@ -98,4 +98,5 @@ class Logger:
     def routine(self, log_message: str):
         print(self.parse(LogLevel.ROUTINE, log_message))
 
+
 logger = Logger()
