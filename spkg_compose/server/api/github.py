@@ -301,6 +301,9 @@ class GitHubApi:
             if info["status"]:
                 logger.ok(
                     f"{MAGENTA}routines@git.build.{info['name']}{CRESET}: Build succeeded for {CYAN}{arch}{RESET}")
+
+                self.index[self.package.meta.id]["architectures"][arch] = True
+                self.update_json()
             else:
                 logger.warning(
                     f"{MAGENTA}routines@git.build.{info['name']}{CRESET}: Build not succeeded for {CYAN}{arch}{RESET}"
