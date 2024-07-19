@@ -27,6 +27,11 @@ github:
   tokens:
     primary:
       token: your_gh_token
+
+repo_http_api:
+  address: 0.0.0.0
+  port: 3087
+  allowed_tokens: ["insert_token_here"]
 """
 
 try:
