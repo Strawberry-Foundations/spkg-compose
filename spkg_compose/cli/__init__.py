@@ -4,6 +4,7 @@ from spkg_compose.cli.help import help_cmd
 from spkg_compose.cli.logger import logger
 from spkg_compose.server import server_main
 from spkg_compose.buildserver import build_server_main
+from spkg_compose.http.repo import repo_api_main
 from spkg_compose.utils.colors import *
 
 args = Args()
@@ -27,7 +28,7 @@ match args.args[1]:
         build_server_main(args.index_start(2))
 
     case "repo-api":
-        pass
+        repo_api_main()
 
     case "build":
         if len(args.args) < 3:
