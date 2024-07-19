@@ -19,10 +19,16 @@ except IndexError:
 match args.args[1]:
     case "help":
         help_cmd()
+
     case "server":
         server_main(args.index_start(2))
+
     case "build-server":
         build_server_main(args.index_start(2))
+
+    case "repo-api":
+        pass
+
     case "build":
         if len(args.args) < 3:
             print(f"{BACK_RED}  ERROR  {BACK_RESET}  Missing compose file!")
