@@ -1,0 +1,26 @@
+[Meta]
+Name=Strawberry Chat Client
+Id=strawberry-chat-client
+Description=Strawberry Chat (Client) is the official Strawberry Chat Client based on Rust
+Version=git+3927749
+Architecture=%runtime_arch%
+Author=Strawberry Foundations <info@strawberryfoundations.org>
+Source=https://github.com/Strawberry-Foundations/strawberry-chat-client
+	
+[Prepare]
+Type=Archive // Types: Git, Archive, BinaryArchive, Binary
+URL=https://github.com/Strawberry-Foundations/strawberry-chat-client/archive/refs/heads/main.tar.gz
+
+[Build]
+BuildSys=cargo
+Workdir=strawberry-chat-client-main
+
+[Build.cargo]
+Exec=cargo build --release
+
+[Install]
+As=binpkg // As: deb, binpkg
+
+[Install.binpkg]
+Prefix=/usr/bin/
+Target=target/release/strawberry-chat-client

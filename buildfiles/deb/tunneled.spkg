@@ -1,0 +1,26 @@
+[Meta]
+Name=Tunneled
+Id=tunneled
+Description=tunneled is a simple CLI tool for making local tcp tunnels
+Version=2.4.0
+Architecture=%runtime_arch%
+Author=Strawberry Foundations <info@strawberryfoundations.org>
+Source=https://github.com/Strawberry-Foundations/tunneled
+
+[Prepare]
+Type=Archive // Types: Git, Archive, BinaryArchive, Binary
+URL=https://github.com/Strawberry-Foundations/tunneled/archive/refs/tags/v2.4.0.tar.gz
+
+[Build]
+BuildSys=cargo
+Workdir=tunneled-2.4.0
+
+[Build.cargo]
+Exec=cargo build --release
+
+[Install]
+As=deb // As: deb, binpkg
+
+[Install.deb]
+Prefix=/usr/bin/
+Target=target/release/tunneled

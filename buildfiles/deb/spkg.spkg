@@ -1,0 +1,26 @@
+[Meta]
+Name=Advanced Source Package Management
+Id=spkg
+Description=spkg is a package manager that downloads the source code from the official sources, and then compiles it specifically for your device
+Version=3.0-git+dd1650f
+Architecture=%runtime_arch%
+Author=Strawberry Foundations <info@strawberryfoundations.org>
+Source=https://github.com/Strawberry-Foundations/spkg
+
+[Prepare]
+Type=Archive // Types: Git, Archive, BinaryArchive, Binary
+URL=https://github.com/Strawberry-Foundations/spkg/archive/refs/heads/main.tar.gz
+
+[Build]
+BuildSys=cargo
+Workdir=spkg-main
+
+[Build.cargo]
+Exec=cargo build --release && bash configure.sh
+
+[Install]
+As=deb // As: deb, binpkg
+
+[Install.deb]
+Prefix=/
+Target=_work/*
