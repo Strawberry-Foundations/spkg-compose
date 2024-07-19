@@ -10,6 +10,7 @@ def help_cmd():
     {CYAN}{BOLD}build {RED}<composefile>:{CRESET} Builds a package by using the given compose file
     {CYAN}{BOLD}server:{CRESET} Starts a local spkg-compose server
     {CYAN}{BOLD}build-server:{CRESET} Starts a local spkg build server
+    {CYAN}{BOLD}repo-api:{CRESET} Repository package upload API  
     """)
 
 
