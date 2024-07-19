@@ -168,5 +168,4 @@ cython_debug/
 /data
 /debian
 /test.py
-/buildfiles_debian
 /local_repo
