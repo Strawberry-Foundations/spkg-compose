@@ -1,12 +1,21 @@
 from spkg_compose.server.config import config
+from spkg_compose import init_dir
+
 from flask import Flask, request, abort
 
+import json
+
+
 app = Flask(__name__)
+
+with open(f"{init_dir}/data/index.json", 'r') as json_file:
+    index = json.load(json_file)
 
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
     auth_header = request.headers.get('Authorization')
+    package_name = request.headers.get('Package')
 
     if auth_header not in [f"Bearer {token}" for token in config.repo_api.allowed_tokens]:
         abort(403)
@@ -18,8 +27,12 @@ def upload_file():
     if file.filename == '':
         abort(400, "No selected file")
 
-    file.save(f"./uploads/{file.filename}")
-    return "File uploaded successfully", 200
+    try:
+        file.save(f"{init_dir}/local_repo/{index[package_name]['binpkg_path']}/{file.filename}")
+    except Exception as err:
+        return f"Package not found ({err})"
+
+    return f"File uploaded successfully '{file.filename} - {package_name}'", 200
 
 
 def repo_api_main():
