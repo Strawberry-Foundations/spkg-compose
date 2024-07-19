@@ -67,8 +67,14 @@ class BuildServerClient:
     def disconnect(self):
         self.send({"event": "disconnect"})
 
-    def update_pkg(self, data, package: SpkgBuild, server_name: str):
-        self.send({"event": "update_pkg", "data": package.compose_data})
+    def update_pkg(self, data, package: SpkgBuild, server_name: str, repo_url: str):
+        self.send(
+            {
+                "event": "update_pkg",
+                "data": package.compose_data,
+                "repo_url": repo_url
+             }
+        )
 
         message = self.recv()
         response = message["response"]
