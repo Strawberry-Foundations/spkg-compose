@@ -176,9 +176,9 @@ class BuildServer:
                         logger.routine(
                             f"{MAGENTA}rt@build{CRESET}: Creating binpkg ..."
                         )
-                        package = package.install_pkg.makepkg()
+                        build_package = package.install_pkg.makepkg()
 
-                        logger.ok(f"{MAGENTA}rt@build{CRESET}: Package successfully build as '{CYAN}{package}{RESET}'")
+                        logger.ok(f"{MAGENTA}rt@build{CRESET}: Package successfully build as '{CYAN}{build_package}{RESET}'")
                         logger.info(f"{MAGENTA}rt@build{CRESET}: Uploading package to {repo_url} ...{RESET}'")
                         url = "http://localhost:3087/upload"
 
@@ -187,7 +187,7 @@ class BuildServer:
                             "Package": package.meta.id
                         }
                         files = {
-                            "file": open(f"{init_dir}/{package}", "rb")
+                            "file": open(f"{init_dir}/{build_package}", "rb")
                         }
 
                         response = requests.post(url, headers=headers, files=files)
