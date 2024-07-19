@@ -7,6 +7,7 @@ import sys
 
 DEFAULT_CONFIG = """server:
   data_dir: /path/to/your/repo
+  repo_api_url: 0.0.0.0:3087
 
 build_server:
   main:
@@ -62,6 +63,7 @@ class Config:
             self.gh_token = config_data["github"]["tokens"]["primary"]["token"]
             self.build_server = config_data["build_server"].items()
             self.repo_api = Config.HttpApi(config_data["repo_http_api"])
+            self.repo_api_url = config_data["server"]["repo_api_url"]
 
         except KeyError as err:
             logger.error(f"Invalid configuration! Please check your configuration file. (Missing key: {err})")
