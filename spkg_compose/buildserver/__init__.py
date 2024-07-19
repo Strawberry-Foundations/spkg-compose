@@ -13,6 +13,7 @@ import os
 import shutil
 import json.decoder
 import platform
+import requests
 
 addresses = {}
 authenticated = {}
@@ -134,6 +135,8 @@ class BuildServer:
                             return client.not_authenticated()
 
                         package = SpkgBuild(message["data"])
+                        repo_url = message["repo_url"]
+
                         logger.routine(
                             f"{MAGENTA}rt@build{CRESET}: Build request from '{CYAN}{client.address}{CRESET}' for "
                             f"package '{GREEN}{package.meta.id}{RESET}', version {CYAN}{package.meta.version}{RESET}"
@@ -174,7 +177,22 @@ class BuildServer:
                             f"{MAGENTA}rt@build{CRESET}: Creating binpkg ..."
                         )
                         package = package.install_pkg.makepkg()
-        
+
+                        logger.ok(f"{MAGENTA}rt@build{CRESET}: Package successfully build as '{CYAN}{package}{RESET}'")
+                        logger.info(f"{MAGENTA}rt@build{CRESET}: Uploading package to {repo_url} ...{RESET}'")
+                        url = "http://localhost:3087/upload"
+
+                        headers = {
+                            "Authorization": "Bearer sf_spc_rupVLyw3fH8xRQqoh2YtmUy5S2FwuxKB",
+                            "Package": package.meta.id
+                        }
+                        files = {
+                            "file": open(f"{init_dir}/{package}", "rb")
+                        }
+
+                        response = requests.post(url, headers=headers, files=files)
+                        print(response.text)
+
                         logger.ok(f"{MAGENTA}rt@build{CRESET}: Package successfully build as '{CYAN}{package}{RESET}'")
                         client.send({"response": "success", "package_file": package})
 
