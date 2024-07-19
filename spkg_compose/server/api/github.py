@@ -324,7 +324,7 @@ class GitHubApi:
         return specfile_old
 
     def build_pkg(self, server, arch, package, name):
-        _status = server.update_pkg(self, package, name)
+        _status = server.update_pkg(self, package, name, self.server.config.repo_api_url)
         server.disconnect()
         self.status[arch]["status"] = True
 
@@ -393,7 +393,7 @@ class GitHubApi:
             data = read(self.file_path)
             package = SpkgBuild(data)
 
-            _status = server.update_pkg(self, package, name)
+            _status = server.update_pkg(self, package, name, self.server.config.repo_api_url)
             server.disconnect()
             self.status[arch]["status"] = True
 
