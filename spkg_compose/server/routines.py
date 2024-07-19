@@ -5,6 +5,7 @@ from spkg_compose.core.parser import read
 from spkg_compose.utils.colors import *
 from spkg_compose.utils.fmt import calculate_percentage, parse_interval
 from spkg_compose.utils.time import unix_to_readable, current_time, convert_time
+from spkg_compose.utils.path import extract_path
 from spkg_compose.cli.logger import logger, RtLogger
 from spkg_compose.package import SpkgBuild
 
@@ -128,14 +129,20 @@ class Routines:
                             specfile_data = yaml.load(_config, Loader=yaml.SafeLoader)
 
                         architectures = {}
-                        for arch, _ in specfile_data["binpkg"].items():
+                        for arch, url in specfile_data["binpkg"].items():
                             architectures.update({arch: True})
+
+                        binpkg_path = next(iter(specfile_data["binpkg"].items()))
+
+                        if binpkg_path != "None":
+                            binpkg_path = extract_path(binpkg_path[1]["url"])
 
                         index[name] = {
                             "compose": file_path,
+                            "specfile": specfile_path,
+                            "binpkg_path": binpkg_path,
                             "latest": "",
                             "architectures": architectures,
-                            "specfile": specfile_path
                         }
 
         with open(self.server.index, 'w') as json_file:
