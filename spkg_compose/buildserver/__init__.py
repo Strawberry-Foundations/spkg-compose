@@ -193,8 +193,8 @@ class BuildServer:
                         response = requests.post(url, headers=headers, files=files)
                         print(response.text)
 
-                        logger.ok(f"{MAGENTA}rt@build{CRESET}: Package successfully build as '{CYAN}{package}{RESET}'")
-                        client.send({"response": "success", "package_file": package})
+                        logger.ok(f"{MAGENTA}rt@build{CRESET}: Package successfully uploaded{RESET}'")
+                        client.send({"response": "success", "package_file": build_package})
 
             except Exception as err:
                 logger.warning(f"Client '{CYAN}{client.address}{RESET}' disconnected unexpected ({err})")
