@@ -236,9 +236,10 @@ class GitHubApi:
         # Update package
         try:
             success = self.update_package(version=version, servers=servers)
-        except:
+        except Exception as err:
             self.rt_logger.error("Something went wrong while updating package", suffix="build")
-            success = False
+            self.rt_logger.error(str(err), suffix="build")
+            return 1
 
         successful_processes = 0
         total_processes = len(success)
@@ -334,6 +335,11 @@ class GitHubApi:
 
         for arch, info in servers.items():
             name = info["name"]
+            available = info["available"]
+
+            if not available:
+                continue
+
             self.rt_logger.info(
                 f"Requesting build process on server '{CYAN}{name}{RESET}' for arch '{CYAN}{arch}{RESET}' for "
                 f"package {GREEN}{self.package.meta.id}-{version}{RESET}", suffix=f"build.{name}"
@@ -347,7 +353,15 @@ class GitHubApi:
             })
 
             server = BuildServerClient(self.server.config.raw['build_server'][name]["address"], self.rt_logger)
-            server.connect()
+            success = server.connect()
+            if not success:
+                self.status.update({
+                    arch: {
+                        "name": name,
+                        "status": False
+                    }
+                })
+                continue
             server.auth(
                 token=self.server.config.raw['build_server'][name]["token"],
                 server_name=name,
@@ -420,7 +434,17 @@ class GitHubApi:
                     continue
 
                 server = BuildServerClient(value["address"], self.rt_logger)
-                server.connect()
+                success = server.connect()
+
+                if not success:
+                    servers.update({
+                        arch: {
+                            "name": name,
+                            "available": False
+                        }
+                    })
+                    continue
+
                 server.auth(
                     token=self.server.config.raw['build_server'][name]["token"],
                     server_name=name,
