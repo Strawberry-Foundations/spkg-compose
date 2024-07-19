@@ -127,9 +127,9 @@ class Routines:
                         with open(specfile_path, "r") as _config:
                             specfile_data = yaml.load(_config, Loader=yaml.SafeLoader)
 
-                        architectures = []
+                        architectures = {}
                         for arch, _ in specfile_data["binpkg"].items():
-                            architectures.append(arch)
+                            architectures.update({arch: True})
 
                         index[name] = {
                             "compose": file_path,
