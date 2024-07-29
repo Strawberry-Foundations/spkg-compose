@@ -3,7 +3,9 @@ from spkg_compose.server.client import BuildServerClient
 from spkg_compose.server.yaml import ordered_load, ordered_dump
 from spkg_compose.cli.logger import RtLogger
 from spkg_compose.utils.colors import *
+from spkg_compose.utils.path import extract_base_url, extract_base_path
 from spkg_compose.package import SpkgBuild
+
 from enum import Enum
 
 import requests
@@ -11,6 +13,7 @@ import json
 import copy
 import threading
 import time
+
 
 
 def gh_check_ratelimit(token: str):
@@ -248,6 +251,44 @@ class GitHubApi:
             if info["status"]:
                 successful_processes += 1
                 self.rt_logger.ok(f"Build succeeded for {CYAN}{arch}{RESET}", suffix=f"build.{info['name']}")
+                try:
+                    with open(self.index[self.package.meta.id]["specfile"], 'r') as file:
+                        specfile = ordered_load(file)
+
+                    if specfile["binpkg"][arch]["url"] == "None":
+                        urls = {}
+
+                        for _arch, details in specfile["binpkg"].items():
+                            urls[_arch] = details['url']
+
+                        valid_url = next((url for url in urls.values() if url is not None), None)
+
+                        if valid_url is None:
+                            self.rt_logger.warning(
+                                "No available build server URL found. Skipping specfile update. "
+                                "Please update it manually"
+                            )
+                            continue
+
+                        base_url = extract_base_path(valid_url)
+                        new_url = f"{base_url}/{info['package']}"
+                        specfile["binpkg"][arch]["url"] = new_url
+
+                    else:
+                        base_url = extract_base_path(specfile["binpkg"][arch]["url"])
+                        new_url = f"{base_url}/{info['package']}"
+                        specfile["binpkg"][arch]["url"] = new_url
+
+                    with open(self.index[self.package.meta.id]["specfile"], 'w') as file:
+                        ordered_dump(specfile, file, default_flow_style=False)
+
+                except:
+                    self.rt_logger.warning("It appears that the index file or the specfile has been edited manually")
+                    self.rt_logger.warning(
+                        "Please remove the benchmark entry from the index file and run the indexing again."
+                    )
+
+                # todo: update specfile & database
             else:
                 self.rt_logger.warning(
                     f"Build not succeeded for {CYAN}{arch}{RESET}", suffix=f"build.{info['name']}"
@@ -323,9 +364,10 @@ class GitHubApi:
         return specfile_old
 
     def build_pkg(self, server, arch, package, name):
-        _status = server.update_pkg(self, package, name, self.server.config.repo_api_url)
+        _status, _package = server.update_pkg(self, package, name, self.server.config.repo_api_url)
         server.disconnect()
-        self.status[arch]["status"] = True
+        self.status[arch]["status"] = _status
+        self.status[arch]["package"] = _package
 
     def update_package(self, version, servers):
         self.status = {}
@@ -346,7 +388,8 @@ class GitHubApi:
             self.status.update({
                 arch: {
                     "name": name,
-                    "status": False
+                    "status": False,
+                    "package": ""
                 }
             })
 
@@ -356,7 +399,8 @@ class GitHubApi:
                 self.status.update({
                     arch: {
                         "name": name,
-                        "status": False
+                        "status": False,
+                        "package": ""
                     }
                 })
                 continue
@@ -391,7 +435,8 @@ class GitHubApi:
             self.status.update({
                 arch: {
                     "name": name,
-                    "status": False
+                    "status": False,
+                    "package": ""
                 }
             })
 
@@ -405,9 +450,10 @@ class GitHubApi:
             data = read(self.file_path)
             package = SpkgBuild(data)
 
-            _status = server.update_pkg(self, package, name, self.server.config.repo_api_url)
+            _status, _package = server.update_pkg(self, package, name, self.server.config.repo_api_url)
             server.disconnect()
-            self.status[arch]["status"] = True
+            self.status[arch]["status"] = _status
+            self.status[arch]["package"] = _package
 
         return self.status
 
