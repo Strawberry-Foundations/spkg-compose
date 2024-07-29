@@ -244,7 +244,6 @@ class GitHubApi:
         successful_processes = 0
         total_processes = len(success)
 
-        # todo: write if package update was successful for every arch in index.json
         for arch, info in success.items():
             if info["status"]:
                 successful_processes += 1
@@ -297,7 +296,6 @@ class GitHubApi:
             self.rt_logger.error(f"Something went wrong while updating package" , suffix="build")
             success = False
 
-        # todo: write if package update was successful for every arch in index.json
         for arch, info in success.items():
             if info["status"]:
                 self.rt_logger.ok(f"Build succeeded for {CYAN}{arch}{RESET}", suffix=f"build.{info['name']}")
