@@ -224,6 +224,8 @@ class BuildServer:
 
 def build_server_main(args):
     logger.default(f"Starting spkg-compose build server v{BUILD_SERVER_VERSION} for {CYAN}{platform.machine()}{RESET}")
+    logger.info(f"{MAGENTA}server@meta{RESET}: Server Name: {CYAN}{_cfg.name}{RESET}")
+    logger.info(f"{MAGENTA}server@meta{RESET}: Server Tags: {CYAN}{f'{GRAY}, {CYAN}'.join(_cfg.tags)}{RESET}")
 
     server = BuildServer(args)
     server.run()
