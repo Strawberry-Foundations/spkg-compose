@@ -96,6 +96,6 @@ class BuildServerClient:
             self.logger.info(
                 f"Package successfully build as '{CYAN}{_package}{RESET}'", suffix=f"build.{server_name}"
             )
-            return True
+            return True, _package
         else:
-            return False
+            return False, None
