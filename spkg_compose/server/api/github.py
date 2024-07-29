@@ -282,13 +282,13 @@ class GitHubApi:
                     with open(self.index[self.package.meta.id]["specfile"], 'w') as file:
                         ordered_dump(specfile, file, default_flow_style=False)
 
+                    # todo: database
+
                 except:
                     self.rt_logger.warning("It appears that the index file or the specfile has been edited manually")
                     self.rt_logger.warning(
                         "Please remove the benchmark entry from the index file and run the indexing again."
                     )
-
-                # todo: update specfile & database
             else:
                 self.rt_logger.warning(
                     f"Build not succeeded for {CYAN}{arch}{RESET}", suffix=f"build.{info['name']}"
