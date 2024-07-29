@@ -30,9 +30,9 @@ def upload_file():
     try:
         file.save(f"{init_dir}/local_repo/{index[package_name]['binpkg_path']}/{file.filename}")
     except Exception as err:
-        return f"Package not found ({err})"
+        return f"Package not found ({err})", 404
 
-    return f"File uploaded successfully '{file.filename} - {package_name}'", 200
+    return f"Binpkg for package '{package_name}' uploaded successfully ({file.filename})", 200
 
 
 def repo_api_main():
