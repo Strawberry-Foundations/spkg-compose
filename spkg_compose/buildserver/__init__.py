@@ -191,7 +191,7 @@ class BuildServer:
                         }
 
                         response = requests.post(url, headers=headers, files=files)
-                        logger.info(f"Response from API: {response.text}")
+                        logger.info(f"{MAGENTA}rt@build{CRESET}: {response.text}{RESET}'")
 
                         logger.ok(f"{MAGENTA}rt@build{CRESET}: Package successfully uploaded{RESET}'")
                         client.send({"response": "success", "package_file": build_package})
