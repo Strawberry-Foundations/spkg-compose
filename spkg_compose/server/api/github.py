@@ -282,7 +282,9 @@ class GitHubApi:
                     with open(self.index[self.package.meta.id]["specfile"], 'w') as file:
                         ordered_dump(specfile, file, default_flow_style=False)
 
-                    # todo: database
+                    # todo: Update database
+                    #  - update version
+                    #  - update srcpkg_url from compose.spkg
 
                 except:
                     self.rt_logger.warning("It appears that the index file or the specfile has been edited manually")
