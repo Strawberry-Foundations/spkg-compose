@@ -9,7 +9,7 @@ import os
 
 DEFAULT_CONFIG = """server:
   data_dir: /path/to/your/repo
-  repo_api_url: 0.0.0.0:3087
+  repo_api_url: http://localhost:3087
 
 build_server:
   main:
