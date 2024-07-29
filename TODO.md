@@ -1,0 +1,1 @@
+- Implement specfile update for binpkg files
