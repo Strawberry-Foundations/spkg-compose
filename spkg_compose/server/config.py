@@ -4,6 +4,8 @@ from spkg_compose.utils.colors import *
 
 import yaml
 import sys
+import os
+
 
 DEFAULT_CONFIG = """server:
   data_dir: /path/to/your/repo
@@ -40,6 +42,9 @@ try:
         config_data = yaml.load(_config, Loader=yaml.SafeLoader)
 except FileNotFoundError:
     logger.warning("Configuration file does not exist. Creating a new one...")
+    if not os.path.exists(init_dir + "/data"):
+        os.mkdir(init_dir + "/data")
+
     with open(init_dir + "/data/config.yml", "w") as _config:
         _config.write(DEFAULT_CONFIG)
     logger.ok(f"Config file created ({GREEN}{init_dir}/data/config.yml{RESET}).")
