@@ -180,7 +180,7 @@ class BuildServer:
 
                         logger.ok(f"{MAGENTA}rt@build{CRESET}: Package successfully build as '{CYAN}{build_package}{RESET}'")
                         logger.info(f"{MAGENTA}rt@build{CRESET}: Uploading package to {repo_url} ...{RESET}'")
-                        url = "http://localhost:3087/upload"
+                        url = f"{self.config.repo_url}/upload"
 
                         headers = {
                             "Authorization": "Bearer sf_spc_rupVLyw3fH8xRQqoh2YtmUy5S2FwuxKB",
