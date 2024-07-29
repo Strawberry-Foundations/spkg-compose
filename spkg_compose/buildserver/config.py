@@ -1,3 +1,5 @@
+import os.path
+
 from spkg_compose import init_dir
 from spkg_compose.cli.logger import logger
 from spkg_compose.utils.colors import *
@@ -29,6 +31,9 @@ try:
         config_data = yaml.load(_config, Loader=yaml.SafeLoader)
 except FileNotFoundError:
     logger.warning("Configuration file does not exist. Creating a new one...")
+    if not os.path.exists(init_dir + "/data"):
+        os.mkdir(init_dir + "/data")
+
     with open(init_dir + "/data/buildserver.yml", "w") as _config:
         _config.write(DEFAULT_CONFIG.replace("sf_spc_some_random_token", f"sf_spc_{generate_token()}"))
     logger.ok(f"Config file created ({GREEN}{init_dir}/data/buildserver.yml{RESET}).")
