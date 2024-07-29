@@ -223,7 +223,7 @@ class BuildServer:
 
 
 def build_server_main(args):
-    logger.default(f"Starting spkg-compose build server v{BUILD_SERVER_VERSION}")
+    logger.default(f"Starting spkg-compose build server v{BUILD_SERVER_VERSION} for {CYAN}{platform.machine()}{RESET}")
 
     server = BuildServer(args)
     server.run()
