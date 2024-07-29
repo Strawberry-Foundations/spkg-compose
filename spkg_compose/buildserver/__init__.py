@@ -193,11 +193,11 @@ class BuildServer:
                         response = requests.post(url, headers=headers, files=files)
                         logger.info(f"{MAGENTA}rt@build{CRESET}: {response.text}{RESET}'")
 
-                        logger.ok(f"{MAGENTA}rt@build{CRESET}: Build succeeded{RESET}")
-                        client.send({"response": "success", "package_file": build_package})
-
                         logger.info(f"{MAGENTA}rt@build{CRESET}: Removing locally saved package '{CYAN}{build_package}{RESET}'")
                         os.remove(f"{init_dir}/{build_package}")
+
+                        logger.ok(f"{MAGENTA}rt@build{CRESET}: Build succeeded{RESET}")
+                        client.send({"response": "success", "package_file": build_package})
 
             except Exception as err:
                 logger.warning(f"Client '{CYAN}{client.address}{RESET}' disconnected unexpected ({err})")
