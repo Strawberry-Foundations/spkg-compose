@@ -21,6 +21,7 @@ DEFAULT_CONFIG = """server:
   address: 127.0.0.1
   port: 3086
   token: sf_spc_some_random_token
+  repo_url: http://localhost:3087
 """
 
 try:
@@ -43,6 +44,8 @@ class Config:
             self.address = config_data["server"]["address"]
             self.port = config_data["server"]["port"]
             self.token = config_data["server"]["token"]
+            self.repo_url = config_data["server"]["repo_url"]
+
         except KeyError as err:
             logger.error(f"Invalid configuration! Please check your configuration file. (Missing key: {err})")
             sys.exit(1)
