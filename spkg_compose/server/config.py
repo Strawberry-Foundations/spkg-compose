@@ -13,6 +13,7 @@ DEFAULT_CONFIG = """server:
 
 build_server:
   main:
+    enabled: true
     name: My build server
     tags: [x86_64, linux]
     address: 127.0.0.1:3086
