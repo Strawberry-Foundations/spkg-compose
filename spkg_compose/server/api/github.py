@@ -476,7 +476,7 @@ class GitHubApi:
             available_servers = 0
 
             for name, value in self.server.config.raw['build_server'].items():
-                if not value["tags"].__contains__(arch):
+                if not value["tags"].__contains__(arch) or not value["enabled"]:
                     continue
 
                 server = BuildServerClient(value["address"], self.rt_logger)
