@@ -30,6 +30,8 @@ class Server:
         available_servers = 0
 
         for name, value in self.config.raw['build_server'].items():
+            if not value["enabled"]:
+                continue
             host, port = value["address"].split(":")
 
             logger.info(
