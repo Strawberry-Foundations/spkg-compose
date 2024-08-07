@@ -20,10 +20,11 @@ type Package struct {
 }
 
 var index PackageIndex
-var initDir = "../data"
+var dataDir = "../data"
+var initDir = "../"
 
 func init() {
-	indexPath := filepath.Join(initDir, "index.json")
+	indexPath := filepath.Join(dataDir, "index.json")
 	indexData, err := os.ReadFile(indexPath)
 	if err != nil {
 		log.Fatalf("Failed to read index file: %v", err)
