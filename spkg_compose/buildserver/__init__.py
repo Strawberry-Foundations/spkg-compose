@@ -179,7 +179,7 @@ class BuildServer:
                         build_package = package.install_pkg.makepkg()
 
                         logger.ok(f"{MAGENTA}rt@build{CRESET}: Package successfully build as '{CYAN}{build_package}{RESET}'")
-                        logger.info(f"{MAGENTA}rt@build{CRESET}: Uploading package to {repo_url} ...{RESET}'")
+                        logger.info(f"{MAGENTA}rt@build{CRESET}: Uploading package to {repo_url} ...{RESET}")
                         url = f"{repo_url}/upload"
 
                         headers = {
@@ -191,7 +191,7 @@ class BuildServer:
                         }
 
                         response = requests.post(url, headers=headers, files=files)
-                        logger.info(f"{MAGENTA}rt@build{CRESET}: {response.text}{RESET}'")
+                        logger.info(f"{MAGENTA}rt@build{CRESET}: {response.text}{RESET}")
 
                         logger.info(f"{MAGENTA}rt@build{CRESET}: Removing locally saved package '{CYAN}{build_package}{RESET}'")
                         os.remove(f"{init_dir}/{build_package}")
