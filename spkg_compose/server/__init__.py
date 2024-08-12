@@ -63,7 +63,7 @@ class Server:
                         if message['version'] != BUILD_SERVER_VERSION:
                             logger.warning(
                                 f"{MAGENTA}buildserver@{name}{CRESET}: Old version detected "
-                                f"({CYAN}v{message['version']}{RESET}). Please update your buildserver"
+                                f"({CYAN}v{message['version']}{RESET}). You need to update your build- or routineserver"
                             )
 
                         _sock.send(send_json({
