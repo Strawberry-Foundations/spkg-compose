@@ -165,7 +165,12 @@ class BuildServer:
                                 url = get_git_url(package)
 
                                 logger.routine(f"{MAGENTA}rt@build{CRESET}: Cloning git repository {CYAN}{url}{RESET}")
-                                os.system(f"git clone {url}")
+
+                                if package.prepare.branch is not None:
+                                    os.system(f"git clone {url} -b {package.prepare.branch}")
+                                else:
+                                    os.system(f"git clone {url}")
+
                                 os.chdir(package.build.workdir)
 
                                 logger.routine(f"{MAGENTA}rt@build{CRESET}: Building package {package.meta.id}-{package.meta.version}")
@@ -197,7 +202,6 @@ class BuildServer:
 
                                 os.system(f"tar xf {filename}")
                                 os.chdir(package.build.workdir)
-
 
                         logger.routine(
                             f"{MAGENTA}rt@build{CRESET}: Creating binpkg ..."
