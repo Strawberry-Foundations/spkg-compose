@@ -36,7 +36,7 @@ def get_full_path(path_str: str) -> str:
 
 
 def download_file(url: str, path: str) -> None:
-    print(f"{BACK_GREEN}  INFO  {BACK_RESET}  Downloading {CYAN}{url}{RESET}")
+    print(f"{BACK_CYAN}  INFO  {BACK_RESET}  Downloading {CYAN}{url}{RESET}")
     try:
         total_file_size = int(urlopen(url).headers["Content-Length"])
     except TypeError:
@@ -47,7 +47,7 @@ def download_file(url: str, path: str) -> None:
     urlretrieve(url=url, filename=path)
 
     open(".stop_download_progress", "a").close()
-    print(f"{BACK_CYAN}   OK   {BACK_RESET}  Finished download\n")
+    print(f"{BACK_GREEN}   OK   {BACK_RESET}  Finished download\n")
 
 
 def download_file_simple(url: str, path: str) -> None:
@@ -81,7 +81,7 @@ def build(compose_file):
 
     package = SpkgBuild(data)
 
-    print(f"{BACK_GREEN}  INFO  {BACK_RESET}  Starting package build process")
+    print(f"{BACK_CYAN}  INFO  {BACK_RESET}  Starting package build process")
 
     print(f"  {CYAN}{BOLD}Package details:{CRESET}")
     print(f"    {GREEN}{BOLD}Name: {CRESET}{package.meta.name}")
