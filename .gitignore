@@ -162,7 +162,7 @@ cython_debug/
 .idea/
 
 
-# spkg-compose directories
+# spkg-compose directories & files
 /packages
 /_work
 /data
@@ -170,3 +170,4 @@ cython_debug/
 /test.py
 /local_repo
 /*.binpkg
+*.swp
