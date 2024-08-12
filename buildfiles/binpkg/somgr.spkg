@@ -1,0 +1,26 @@
+[Meta]
+Name=StrawberryOS Manager
+Id=somgr
+Description=somgr is the management tool for StrawberryOS to update, configure or manage your operating system
+Version=git+83c1e73
+Architecture=%runtime_arch%
+Author=Strawberry Foundations <info@strawberryfoundations.org>
+Source=https://github.com/Strawberry-Foundations/somgr
+
+[Prepare]
+Type=Git // Types: Git, Archive, BinaryArchive, Binary
+URL=%meta.source%
+
+[Build]
+BuildSys=cargo
+Workdir=somgr
+
+[Build.cargo]
+Exec=cargo build --release
+
+[Install]
+As=binpkg // As: deb, binpkg
+
+[Install.binpkg]
+Prefix=/usr/bin/
+Target=target/release/somgr
