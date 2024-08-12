@@ -39,9 +39,9 @@ def download_file(url: str, path: str) -> None:
     try:
         total_file_size = int(urlopen(url).headers["Content-Length"])
     except TypeError:
-        total_file_size = "NaN"
+        total_file_size = "N/A"
 
-    Thread(target=_print_download_progress, args=(Path(path), total_file_size,), daemon=True).start()
+    Thread(target=_print_download_progress, args=(Path(path), total_file_size), daemon=True).start()
 
     urlretrieve(url=url, filename=path)
 
@@ -56,13 +56,16 @@ def _print_download_progress(file_path: Path, total_size) -> None:
     if total_size is None:
         return
 
+    if total_size != "N/A":
+        total_size = (total_size / 1048576)
+
     while True:
         if path_exists(".stop_download_progress"):
             rmfile(".stop_download_progress")
             return
         try:
             print("\rDownloading: " + "%.0f" % int(file_path.stat().st_size / 1048576) + "mb / "
-                  + "%.0f" % (total_size / 1048576) + "mb", end="", flush=True)
+                  + "%.0f" % total_size + "mb", end="", flush=True)
         except FileNotFoundError:
             time.sleep(0.5)
 
