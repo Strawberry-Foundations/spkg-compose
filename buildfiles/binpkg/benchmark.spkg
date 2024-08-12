@@ -8,12 +8,12 @@ Author=Strawberry Foundations <info@strawberryfoundations.org>
 Source=https://github.com/Strawberry-Foundations/benchmark
 
 [Prepare]
-Type=Archive // Types: Git, Archive, BinaryArchive, Binary
-URL=https://github.com/Strawberry-Foundations/benchmark/archive/refs/heads/main.tar.gz
+Type=Git // Types: Git, Archive, BinaryArchive, Binary
+URL=%meta.source%
 
 [Build]
 BuildSys=cargo
-Workdir=benchmark-main
+Workdir=benchmark
 
 [Build.cargo]
 Exec=cargo build --release
