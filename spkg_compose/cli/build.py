@@ -1,5 +1,3 @@
-import platform
-
 from spkg_compose.core.parser import read
 from spkg_compose.package import SpkgBuild
 from spkg_compose.utils.colors import *
@@ -12,6 +10,7 @@ import os
 import shutil
 import contextlib
 import time
+import platform
 
 
 def rmfile(file: str, force: bool = False) -> None:
