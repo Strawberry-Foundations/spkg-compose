@@ -103,6 +103,17 @@ def build(compose_file):
     print(f"{BACK_CYAN}  INFO  {BACK_RESET}  Preparing for type {CYAN}{package.prepare.type}{RESET}")
 
     match package.prepare.type.lower():
+        case "git":
+            os.chdir("_work")
+            url = get_git_url(package)
+
+            print(f"{BACK_CYAN}  INFO  {BACK_RESET}  Cloning git repository {CYAN}{url}{RESET}")
+            os.system(f"git clone {url}")
+            os.chdir(package.build.workdir)
+
+            print(f"{BACK_CYAN}  INFO  {BACK_RESET}  Running build command '{CYAN}{package.builder.build_command}{RESET}'")
+            os.system(package.builder.build_command)
+
         case "archive":
             filename = package.prepare.url.split("/")[-1]
             os.chdir("_work")
@@ -115,16 +126,14 @@ def build(compose_file):
             print(f"{BACK_CYAN}  INFO  {BACK_RESET}  Running build command '{CYAN}{package.builder.build_command}{RESET}'")
             os.system(package.builder.build_command)
 
-        case "git":
+        case "binaryarchive":
+            filename = package.prepare.url.split("/")[-1]
             os.chdir("_work")
-            url = get_git_url(package)
+            download_file(package.prepare.url, filename)
 
-            print(f"{BACK_CYAN}  INFO  {BACK_RESET}  Cloning git repository {CYAN}{url}{RESET}")
-            os.system(f"git clone {url}")
+            print(f"{BACK_CYAN}  INFO  {BACK_RESET}  Extracting archive {CYAN}{filename}{RESET}")
+            os.system(f"tar xf {filename}")
             os.chdir(package.build.workdir)
-
-            print(f"{BACK_CYAN}  INFO  {BACK_RESET}  Running build command '{CYAN}{package.builder.build_command}{RESET}'")
-            os.system(package.builder.build_command)
 
     package = package.install_pkg.makepkg()
 
