@@ -85,10 +85,12 @@ def build(compose_file):
 
     print(f"  {CYAN}{BOLD}Package details:{CRESET}")
     print(f"    {GREEN}{BOLD}Name: {CRESET}{package.meta.name}")
+    print(f"    {GREEN}{BOLD}ID: {CRESET}{package.meta.id}")
     print(f"    {GREEN}{BOLD}Description: {CRESET}{package.meta.description}")
     print(f"    {GREEN}{BOLD}Version: {CRESET}{package.meta.version}")
     print(f"    {GREEN}{BOLD}Architecture: {CRESET}{package.meta.architecture} {_get_arch(package.meta.architecture)}")
     print(f"    {GREEN}{BOLD}Author: {CRESET}{package.meta.author}")
+    print(f"    {GREEN}{BOLD}Source: {CRESET}{package.meta.source}")
     print(f"    {GREEN}{BOLD}Package Format: {CRESET}{package.install.type_as}\n")
 
     try:
