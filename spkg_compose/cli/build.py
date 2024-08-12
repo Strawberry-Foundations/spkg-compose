@@ -100,16 +100,18 @@ def build(compose_file):
         os.mkdir("_work")
 
     print(f"{BACK_CYAN}  INFO  {BACK_RESET}  Preparing for type {CYAN}{package.prepare.type}{RESET}")
-    if package.prepare.type == "Archive":
-        filename = package.prepare.url.split("/")[-1]
-        os.chdir("_work")
 
-        download_file(package.prepare.url, filename)
+    match package.prepare.type:
+        case "Archive":
+            filename = package.prepare.url.split("/")[-1]
+            os.chdir("_work")
 
-        os.system(f"tar xf {filename}")
-        os.chdir(package.build.workdir)
-        print(f"{BACK_CYAN}  INFO  {BACK_RESET}  Running build command '{CYAN}{package.builder.build_command}{RESET}'")
-        os.system(package.builder.build_command)
+            download_file(package.prepare.url, filename)
+
+            os.system(f"tar xf {filename}")
+            os.chdir(package.build.workdir)
+            print(f"{BACK_CYAN}  INFO  {BACK_RESET}  Running build command '{CYAN}{package.builder.build_command}{RESET}'")
+            os.system(package.builder.build_command)
 
     package = package.install_pkg.makepkg()
 
