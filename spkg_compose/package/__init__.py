@@ -64,6 +64,7 @@ class _SpkgPackagePrepare:
     def __init__(self):
         self.type = None
         self.url = None
+        self.branch = None
 
 
 class _SpkgPackageBuild:
