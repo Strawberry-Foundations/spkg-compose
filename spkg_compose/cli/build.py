@@ -47,7 +47,7 @@ def download_file(url: str, path: str) -> None:
     urlretrieve(url=url, filename=path)
 
     open(".stop_download_progress", "a").close()
-    print(f"{BACK_GREEN}   OK   {BACK_RESET}  Finished download\n")
+    print(f"{BACK_GREEN}   OK   {BACK_RESET}  Finished download")
 
 
 def download_file_simple(url: str, path: str) -> None:
@@ -99,6 +99,7 @@ def build(compose_file):
         shutil.rmtree("_work")
         os.mkdir("_work")
 
+    print(f"{BACK_CYAN}  INFO  {BACK_RESET}  Preparing for type {CYAN}{package.prepare.type}{RESET}")
     if package.prepare.type == "Archive":
         filename = package.prepare.url.split("/")[-1]
         os.chdir("_work")
@@ -107,6 +108,7 @@ def build(compose_file):
 
         os.system(f"tar xf {filename}")
         os.chdir(package.build.workdir)
+        print(f"{BACK_CYAN}  INFO  {BACK_RESET}  Running build command '{CYAN}{package.builder.build_command}{RESET}'")
         os.system(package.builder.build_command)
 
     package = package.install_pkg.makepkg()
