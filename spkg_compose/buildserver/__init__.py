@@ -1,4 +1,5 @@
 from spkg_compose import BUILD_SERVER_VERSION, init_dir
+from spkg_compose.core.git import get_git_url
 from spkg_compose.buildserver.config import config as _cfg
 from spkg_compose.cli.build import download_file_simple
 from spkg_compose.cli.logger import logger
@@ -103,7 +104,8 @@ class BuildServer:
 
                         if token != self.config.token:
                             client.send({"response": "invalid_token"})
-                            logger.warning(f"{LIGHT_BLUE}auth{RESET}: Invalid token from '{CYAN}{client.address}{CRESET}'")
+                            logger.warning(
+                                f"{LIGHT_BLUE}auth{RESET}: Invalid token from '{CYAN}{client.address}{CRESET}'")
                             client.close()
                         else:
                             client.send({
@@ -155,23 +157,34 @@ class BuildServer:
                         except FileExistsError:
                             shutil.rmtree("_work")
                             os.mkdir("_work")
-        
-                        if package.prepare.type == "Archive":
-                            filename = package.prepare.url.split("/")[-1]
-                            os.chdir("_work")
 
-                            try:
-                                download_file_simple(package.prepare.url, filename)
-                            except Exception as err:
-                                logger.warning(f"Exception occurred {err}")
-        
-                            os.system(f"tar xf {filename}")
-                            os.chdir(package.build.workdir)
+                        logger.routine(f"{MAGENTA}rt@build{CRESET}: Preparing for type {CYAN}{package.prepare.type}{RESET}")
+                        match package.prepare.type.lower():
+                            case "archive":
+                                filename = package.prepare.url.split("/")[-1]
+                                os.chdir("_work")
 
-                            logger.routine(
-                                f"{MAGENTA}rt@build{CRESET}: Building package {package.meta.id}-{package.meta.version}"
-                            )
-                            os.system(package.builder.build_command)
+                                try:
+                                    download_file_simple(package.prepare.url, filename)
+                                except Exception as err:
+                                    logger.warning(f"Exception occurred {err}")
+
+                                os.system(f"tar xf {filename}")
+                                os.chdir(package.build.workdir)
+
+                                logger.routine(f"{MAGENTA}rt@build{CRESET}: Building package {package.meta.id}-{package.meta.version}")
+                                os.system(package.builder.build_command)
+
+                            case "git":
+                                os.chdir("_work")
+                                url = get_git_url(package)
+
+                                logger.routine(f"{MAGENTA}rt@build{CRESET}: Cloning git repository {CYAN}{url}{RESET}")
+                                os.system(f"git clone {url}")
+                                os.chdir(package.build.workdir)
+
+                                logger.routine(f"{MAGENTA}rt@build{CRESET}: Building package {package.meta.id}-{package.meta.version}")
+                                os.system(package.builder.build_command)
 
                         logger.routine(
                             f"{MAGENTA}rt@build{CRESET}: Creating binpkg ..."
@@ -193,7 +206,8 @@ class BuildServer:
                         response = requests.post(url, headers=headers, files=files)
                         logger.info(f"{MAGENTA}rt@build{CRESET}: {response.text}{RESET}")
 
-                        logger.info(f"{MAGENTA}rt@build{CRESET}: Removing locally saved package '{CYAN}{build_package}{RESET}'")
+                        logger.info(
+                            f"{MAGENTA}rt@build{CRESET}: Removing locally saved package '{CYAN}{build_package}{RESET}'")
                         os.remove(f"{init_dir}/{build_package}")
 
                         logger.ok(f"{MAGENTA}rt@build{CRESET}: Build succeeded{RESET}")
