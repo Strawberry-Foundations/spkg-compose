@@ -1,4 +1,5 @@
 from spkg_compose.core.parser import read
+from spkg_compose.core.git import get_git_url
 from spkg_compose.package import SpkgBuild
 from spkg_compose.utils.colors import *
 
@@ -36,7 +37,7 @@ def get_full_path(path_str: str) -> str:
 
 
 def download_file(url: str, path: str) -> None:
-    print(f"{BACK_CYAN}  INFO  {BACK_RESET}  Downloading {CYAN}{url}{RESET}")
+
     try:
         total_file_size = int(urlopen(url).headers["Content-Length"])
     except TypeError:
@@ -101,15 +102,27 @@ def build(compose_file):
 
     print(f"{BACK_CYAN}  INFO  {BACK_RESET}  Preparing for type {CYAN}{package.prepare.type}{RESET}")
 
-    match package.prepare.type:
-        case "Archive":
+    match package.prepare.type.lower():
+        case "archive":
             filename = package.prepare.url.split("/")[-1]
             os.chdir("_work")
-
             download_file(package.prepare.url, filename)
 
+            print(f"{BACK_CYAN}  INFO  {BACK_RESET}  Extracting archive {CYAN}{filename}{RESET}")
             os.system(f"tar xf {filename}")
             os.chdir(package.build.workdir)
+
+            print(f"{BACK_CYAN}  INFO  {BACK_RESET}  Running build command '{CYAN}{package.builder.build_command}{RESET}'")
+            os.system(package.builder.build_command)
+
+        case "git":
+            os.chdir("_work")
+            url = get_git_url(package)
+
+            print(f"{BACK_CYAN}  INFO  {BACK_RESET}  Cloning git repository {CYAN}{url}{RESET}")
+            os.system(f"git clone {url}")
+            os.chdir(package.build.workdir)
+
             print(f"{BACK_CYAN}  INFO  {BACK_RESET}  Running build command '{CYAN}{package.builder.build_command}{RESET}'")
             os.system(package.builder.build_command)
 
