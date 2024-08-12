@@ -10,3 +10,10 @@ class SpkgPackageBuilder:
             self.compose_data = data
 
             self.build_command = data["Build.any"]["Exec"]
+
+    class NoneType:
+        def __init__(self, data: dict):
+            self.compose_data = data
+
+            self.build_command = "true"
+

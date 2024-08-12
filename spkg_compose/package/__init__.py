@@ -20,6 +20,8 @@ class SpkgBuild:
                 self.builder = SpkgPackageBuilder.Cargo(data)
             case "any":
                 self.builder = SpkgPackageBuilder.Any(data)
+            case "none":
+                self.builder = SpkgPackageBuilder.NoneType(data)
 
         match data["Install"]["As"]:
             case "deb":
