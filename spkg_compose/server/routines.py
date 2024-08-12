@@ -137,7 +137,7 @@ class Routines:
                             architectures.update({arch: True})
 
                         binpkg_path = next(iter(specfile_data["binpkg"].items()))
-
+                        print(binpkg_path)
                         if binpkg_path != "None":
                             binpkg_path = extract_path(binpkg_path[1]["url"])
 
