@@ -4,7 +4,7 @@ from spkg_compose import VERSION
 
 def help_cmd():
     print(f"""\
-{BOLD}{CYAN}{UNDERLINE}spkg-compose v{VERSION}{CRESET}\n\
+{BOLD}{CYAN}{UNDERLINE}Spkg Compose CLI v{VERSION}{CRESET}\n\
 {GREEN}{BOLD}Usage:{RESET} {WHITE}spkg-compose {CYAN}[command] {RED}[<options>]{CRESET}\n\n\
 {MAGENTA}{BOLD}Commands:{CRESET}
     {CYAN}{BOLD}build {RED}<composefile>:{CRESET} Builds a package by using the given compose file
