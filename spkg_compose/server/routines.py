@@ -10,6 +10,7 @@ from spkg_compose.cli.logger import logger, RtLogger
 from spkg_compose.package import SpkgBuild
 
 from datetime import datetime
+from yaml.parser import ParserError
 
 import os
 import json
@@ -125,8 +126,11 @@ class Routines:
                         rt_logger.info(f"Found new compose package '{CYAN}{name}{CRESET}'")
                         specfile_path = file_path.replace("/compose.spkg", "/specfile.yml")
 
-                        with open(specfile_path, "r") as _config:
-                            specfile_data = yaml.load(_config, Loader=yaml.SafeLoader)
+                        with open(specfile_path, "r") as _specfile:
+                            try:
+                                specfile_data = yaml.load(_specfile, Loader=yaml.SafeLoader)
+                            except ParserError:
+                                rt_logger.error("Either your specfile syntax is invalid or there's no compose.spkg")
 
                         architectures = {}
                         for arch, url in specfile_data["binpkg"].items():
