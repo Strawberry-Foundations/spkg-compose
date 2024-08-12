@@ -108,7 +108,12 @@ def build(compose_file):
             url = get_git_url(package)
 
             print(f"{BACK_CYAN}  INFO  {BACK_RESET}  Cloning git repository {CYAN}{url}{RESET}")
-            os.system(f"git clone {url}")
+
+            if package.prepare.branch is not None:
+                os.system(f"git clone {url} -b {package.prepare.branch}")
+            else:
+                os.system(f"git clone {url}")
+
             os.chdir(package.build.workdir)
 
             print(f"{BACK_CYAN}  INFO  {BACK_RESET}  Running build command '{CYAN}{package.builder.build_command}{RESET}'")
