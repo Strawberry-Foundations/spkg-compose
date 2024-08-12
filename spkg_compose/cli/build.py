@@ -36,6 +36,7 @@ def get_full_path(path_str: str) -> str:
 
 
 def download_file(url: str, path: str) -> None:
+    print(f"    Downloading {CYAN}{url}{RESET}")
     try:
         total_file_size = int(urlopen(url).headers["Content-Length"])
     except TypeError:
@@ -46,6 +47,7 @@ def download_file(url: str, path: str) -> None:
     urlretrieve(url=url, filename=path)
 
     open(".stop_download_progress", "a").close()
+    print(f"    Finished download\n")
 
 
 def download_file_simple(url: str, path: str) -> None:
@@ -87,7 +89,7 @@ def build(compose_file):
     print(f"    {GREEN}{BOLD}Version: {CRESET}{package.meta.version}")
     print(f"    {GREEN}{BOLD}Architecture: {CRESET}{package.meta.architecture} {_get_arch(package.meta.architecture)}")
     print(f"    {GREEN}{BOLD}Author: {CRESET}{package.meta.author}")
-    print(f"    {GREEN}{BOLD}Package Format: {CRESET}{package.install.type_as}")
+    print(f"    {GREEN}{BOLD}Package Format: {CRESET}{package.install.type_as}\n")
 
     try:
         os.mkdir("_work")
