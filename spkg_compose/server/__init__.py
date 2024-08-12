@@ -1,4 +1,4 @@
-from spkg_compose import SERVER_VERSION, init_dir
+from spkg_compose import SERVER_VERSION, BUILD_SERVER_VERSION, init_dir
 from spkg_compose.server.config import config as _cfg
 from spkg_compose.server.json import send_json, convert_json_data
 from spkg_compose.server.routines import Routines
@@ -59,6 +59,13 @@ class Server:
                             f"'{CYAN}{name}{RESET}' (version {CYAN}{message['version']}{RESET} on "
                             f"{GREEN}{message['architecture']}{RESET})"
                         )
+
+                        if message['version'] != BUILD_SERVER_VERSION:
+                            logger.warning(
+                                f"{MAGENTA}buildserver@{name}{CRESET}: Old version detected "
+                                f"({CYAN}v{message['version']}{RESET}). Please update your buildserver"
+                            )
+
                         _sock.send(send_json({
                             "event": "disconnect",
                         }).encode("utf8"))
