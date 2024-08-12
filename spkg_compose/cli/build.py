@@ -72,7 +72,7 @@ def _print_download_progress(file_path: Path, total_size) -> None:
 
 def build(compose_file):
     def _get_arch(arch: str):
-        if arch == "OnBuildSystem":
+        if arch == "%runtime_arch%":
             return f"({platform.machine()})"
 
     data = read(compose_file)
