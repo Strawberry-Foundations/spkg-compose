@@ -160,6 +160,17 @@ class BuildServer:
 
                         logger.routine(f"{MAGENTA}rt@build{CRESET}: Preparing for type {CYAN}{package.prepare.type}{RESET}")
                         match package.prepare.type.lower():
+                            case "git":
+                                os.chdir("_work")
+                                url = get_git_url(package)
+
+                                logger.routine(f"{MAGENTA}rt@build{CRESET}: Cloning git repository {CYAN}{url}{RESET}")
+                                os.system(f"git clone {url}")
+                                os.chdir(package.build.workdir)
+
+                                logger.routine(f"{MAGENTA}rt@build{CRESET}: Building package {package.meta.id}-{package.meta.version}")
+                                os.system(package.builder.build_command)
+
                             case "archive":
                                 filename = package.prepare.url.split("/")[-1]
                                 os.chdir("_work")
@@ -175,16 +186,18 @@ class BuildServer:
                                 logger.routine(f"{MAGENTA}rt@build{CRESET}: Building package {package.meta.id}-{package.meta.version}")
                                 os.system(package.builder.build_command)
 
-                            case "git":
+                            case "binaryarchive":
+                                filename = package.prepare.url.split("/")[-1]
                                 os.chdir("_work")
-                                url = get_git_url(package)
 
-                                logger.routine(f"{MAGENTA}rt@build{CRESET}: Cloning git repository {CYAN}{url}{RESET}")
-                                os.system(f"git clone {url}")
+                                try:
+                                    download_file_simple(package.prepare.url, filename)
+                                except Exception as err:
+                                    logger.warning(f"Exception occurred {err}")
+
+                                os.system(f"tar xf {filename}")
                                 os.chdir(package.build.workdir)
 
-                                logger.routine(f"{MAGENTA}rt@build{CRESET}: Building package {package.meta.id}-{package.meta.version}")
-                                os.system(package.builder.build_command)
 
                         logger.routine(
                             f"{MAGENTA}rt@build{CRESET}: Creating binpkg ..."
