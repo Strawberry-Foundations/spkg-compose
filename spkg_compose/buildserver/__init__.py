@@ -209,11 +209,11 @@ class BuildServer:
                         build_package = package.install_pkg.makepkg()
 
                         logger.ok(f"{MAGENTA}rt@build{CRESET}: Package successfully build as '{CYAN}{build_package}{RESET}'")
-                        logger.info(f"{MAGENTA}rt@build{CRESET}: Uploading package to {repo_url} ...{RESET}")
+                        logger.info(f"{MAGENTA}rt@build{CRESET}: Uploading package to {BLUE}{repo_url}{RESET} ...")
                         url = f"{repo_url}/upload"
 
                         headers = {
-                            "Authorization": "Bearer sf_spc_rupVLyw3fH8xRQqoh2YtmUy5S2FwuxKB",
+                            "Authorization": f"Bearer {self.config.token}",
                             "Package": package.meta.id
                         }
                         files = {
