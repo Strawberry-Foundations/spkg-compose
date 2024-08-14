@@ -23,8 +23,8 @@ routines:
   - name: index
     process: indexing
     every: 30m
-  - name: fetch-git
-    process: git
+  - name: checkout
+    process: checkout
     every: 15m
 
 github:
