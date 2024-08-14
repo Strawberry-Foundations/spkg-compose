@@ -234,10 +234,24 @@ class BuildServer:
 
                         match response.status_code:
                             case 403:
-                                logger.info(
+                                logger.warning(
                                     f"{MAGENTA}rt@build{CRESET}: This build server does not have access to the HTTP "
                                     f"API. Check the token in your config{RESET}"
                                 )
+                                logger.info(
+                                    f"{MAGENTA}rt@build{CRESET}: Removing locally saved package "
+                                    f"'{CYAN}{build_package}{RESET}'"
+                                )
+                                os.remove(f"{init_dir}/{build_package}")
+                                logger.warning(f"{MAGENTA}rt@build{CRESET}: Build not succeeded{RESET}")
+                                return client.send({"response": "failed"})
+
+                            case 404:
+                                logger.warning(
+                                    f"{MAGENTA}rt@build{CRESET}: Something went wrong while uploading the package. "
+                                    f"The API returned with status code 404 - Not Found"
+                                )
+                                logger.warning(f"{MAGENTA}rt@build{CRESET}: Error details: {response.text}{RESET}")
                                 logger.info(
                                     f"{MAGENTA}rt@build{CRESET}: Removing locally saved package "
                                     f"'{CYAN}{build_package}{RESET}'"
@@ -250,7 +264,7 @@ class BuildServer:
                                 logger.info(f"{MAGENTA}rt@build{CRESET}: {response.text}{RESET}")
 
                             case 500:
-                                logger.info(f"{MAGENTA}rt@build{CRESET}: Internal server error! Something went wrong!")
+                                logger.warning(f"{MAGENTA}rt@build{CRESET}: Internal server error! Something went wrong!")
                                 logger.info(
                                     f"{MAGENTA}rt@build{CRESET}: Removing locally saved package "
                                     f"'{CYAN}{build_package}{RESET}'"
