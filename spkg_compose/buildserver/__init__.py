@@ -245,8 +245,20 @@ class BuildServer:
                                 os.remove(f"{init_dir}/{build_package}")
                                 logger.warning(f"{MAGENTA}rt@build{CRESET}: Build not succeeded{RESET}")
                                 return client.send({"response": "failed"})
+
                             case 200:
                                 logger.info(f"{MAGENTA}rt@build{CRESET}: {response.text}{RESET}")
+
+                            case 500:
+                                logger.info(f"{MAGENTA}rt@build{CRESET}: Internal server error! Something went wrong!")
+                                logger.info(
+                                    f"{MAGENTA}rt@build{CRESET}: Removing locally saved package "
+                                    f"'{CYAN}{build_package}{RESET}'"
+                                )
+                                os.remove(f"{init_dir}/{build_package}")
+                                logger.warning(f"{MAGENTA}rt@build{CRESET}: Build not succeeded{RESET}")
+                                return client.send({"response": "failed"})
+
                             case _:
                                 logger.info(
                                     f"{MAGENTA}rt@build{CRESET}: Got unknown status code from HTTP API: "
