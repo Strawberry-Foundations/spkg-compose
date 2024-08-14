@@ -40,6 +40,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	packageName := r.Header.Get("Package")
 
 	if !isValidToken(authHeader) {
+		log.Println("Client authenticated with an invalid token")
 		http.Error(w, "Forbidden", http.StatusForbidden)
 		return
 	}
