@@ -4,6 +4,8 @@ from spkg_compose.cli.help import help_cmd
 from spkg_compose.cli.logger import logger
 from spkg_compose.utils.colors import *
 
+import sys
+
 args = Args()
 args.parse_args()
 
@@ -38,3 +40,7 @@ match args.args[1]:
             build(compose_file=args.args[2])
         except KeyboardInterrupt:
             print(f"{BACK_YELLOW} WARNING {BACK_RESET}  Canceling operation")
+
+    case _:
+        print(f"{BACK_RED}  ERROR  {BACK_RESET}  Invalid command!")
+        sys.exit(1)
