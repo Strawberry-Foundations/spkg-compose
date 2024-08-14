@@ -219,12 +219,41 @@ class BuildServer:
                         files = {
                             "file": open(f"{init_dir}/{build_package}", "rb")
                         }
+                        try:
+                            response = requests.post(url, headers=headers, files=files)
+                        except Exception as err:
+                            logger.warning(f"{MAGENTA}rt@build{CRESET}: Apparently the HTTP API is not available{RESET}")
+                            logger.warning(f"{MAGENTA}rt@build{CRESET}: Error details: {err}{RESET}")
+                            logger.info(
+                                f"{MAGENTA}rt@build{CRESET}: Removing locally saved package "
+                                f"'{CYAN}{build_package}{RESET}'"
+                            )
+                            os.remove(f"{init_dir}/{build_package}")
+                            logger.warning(f"{MAGENTA}rt@build{CRESET}: Build not succeeded{RESET}")
+                            return client.send({"response": "failed"})
 
-                        response = requests.post(url, headers=headers, files=files)
-                        logger.info(f"{MAGENTA}rt@build{CRESET}: {response.text}{RESET}")
+                        match response.status_code:
+                            case 403:
+                                logger.info(
+                                    f"{MAGENTA}rt@build{CRESET}: This build server does not have access to the HTTP "
+                                    f"API. Check the token in your config{RESET}"
+                                )
+                                logger.info(
+                                    f"{MAGENTA}rt@build{CRESET}: Removing locally saved package "
+                                    f"'{CYAN}{build_package}{RESET}'"
+                                )
+                                os.remove(f"{init_dir}/{build_package}")
+                                logger.warning(f"{MAGENTA}rt@build{CRESET}: Build not succeeded{RESET}")
+                                return client.send({"response": "failed"})
+                            case 200:
+                                logger.info(f"{MAGENTA}rt@build{CRESET}: {response.text}{RESET}")
+                            case _:
+                                logger.info(
+                                    f"{MAGENTA}rt@build{CRESET}: Got unknown status code from HTTP API: "
+                                    f"{response.status_code}{RESET}"
+                                )
 
-                        logger.info(
-                            f"{MAGENTA}rt@build{CRESET}: Removing locally saved package '{CYAN}{build_package}{RESET}'")
+                        logger.info(f"{MAGENTA}rt@build{CRESET}: Removing locally saved package '{CYAN}{build_package}{RESET}'")
                         os.remove(f"{init_dir}/{build_package}")
 
                         logger.ok(f"{MAGENTA}rt@build{CRESET}: Build succeeded{RESET}")
