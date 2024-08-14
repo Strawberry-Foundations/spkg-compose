@@ -28,7 +28,7 @@ def upload_file():
         abort(400, "No selected file")
 
     try:
-        file.save(f"{init_dir}/local_repo/{index[package_name]['binpkg_path']}/{file.filename}")
+        file.save(f"{config.data_dir}/{index[package_name]['binpkg_path']}/{file.filename}")
     except Exception as err:
         return f"Package not found ({err})", 404
 
