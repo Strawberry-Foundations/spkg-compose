@@ -1,0 +1,22 @@
+[Meta]
+Name=Realtek RTL8821CE Driver
+Id=rtl8821ce
+Description=Realtek RTL8821CE Driver
+Version=git+f119398
+Architecture=x86_64
+Author=tomaspinho
+Source=https://github.com/tomaspinho/rtl8821ce
+
+[Prepare]
+Type=Git // Types: Git, Archive, BinaryArchive, Binary
+URL=%meta.source%
+
+[Build]
+BuildSys=any
+Workdir=rtl8821ce
+
+[Build.any]
+Exec=false
+
+[Install]
+As=source // As: deb, binpkg
