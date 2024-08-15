@@ -60,15 +60,15 @@ def _print_download_progress(file_path: Path, total_size) -> None:
         return
 
     if total_size != "N/A":
-        total_size = (total_size / 1048576)
+        total_size = "%.0f" % (total_size / 1048576)
 
     while True:
         if path_exists(".stop_download_progress"):
             rmfile(".stop_download_progress")
             return
         try:
-            print("\rDownloading: " + "%.0f" % int(file_path.stat().st_size / 1048576) + "mb / "
-                  + "%.0f" % total_size + "mb", end="", flush=True)
+            print("\rDownloading: " + "%.0f" % int(file_path.stat().st_size / 1048576) + "MB / "
+                  + total_size + "MB", end="", flush=True)
         except FileNotFoundError:
             time.sleep(0.5)
 
