@@ -66,7 +66,7 @@ Description: {self.description}
             os.chdir(f"{execution_dir}/_work")
 
             os.system("dpkg-deb --build _deb")
-            os.system(f"mv _deb.deb {self.id}-{self.version}-{self.architecture}.deb")
-            os.system(f"mv {self.id}-{self.version}-{self.architecture}.deb ..")
+            os.system(f"mv _deb.deb {self.id}-{self.version}_{self.architecture}.deb")
+            os.system(f"mv {self.id}-{self.version}_{self.architecture}.deb ..")
 
-            return f"{self.id}-{self.version}-{self.architecture}.deb"
+            return f"{self.id}-{self.version}_{self.architecture}.deb"
