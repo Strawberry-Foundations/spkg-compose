@@ -44,8 +44,6 @@ class SpkgDebPkgFormat:
         os.chdir(f"{execution_dir}/_work")
         os.system(f"cp -r {self.build_workdir}/{self.target} _deb/{self.prefix}")
 
-        self.architecture = "all"
-
         if self.architecture == "%runtime_arch%":
             match platform.machine():
                 case "x86_64":
