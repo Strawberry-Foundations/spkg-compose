@@ -63,6 +63,10 @@ class GitHubApi:
 
     def fetch(self):
         """Fetches the latest release from GitHub. If there is no release, the last commit is retrieved"""
+        try:
+            checkfor = self.index[self.package.meta.id]["checkfor"]
+        except:
+            checkfor = ""
 
         api_url, repo = self.to_gh_api_url("releases")
         headers = {
@@ -72,6 +76,9 @@ class GitHubApi:
         response = requests.get(api_url, headers=headers)
 
         self.repo = repo
+
+        if checkfor == "commit":
+            return self.fetch_commit()
 
         if response.status_code == 200:
             releases = response.json()
