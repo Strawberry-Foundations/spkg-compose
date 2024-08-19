@@ -37,7 +37,6 @@ def get_full_path(path_str: str) -> str:
 
 
 def download_file(url: str, path: str) -> None:
-
     try:
         total_file_size = int(urlopen(url).headers["Content-Length"])
     except TypeError:
@@ -67,8 +66,10 @@ def _print_download_progress(file_path: Path, total_size) -> None:
             rmfile(".stop_download_progress")
             return
         try:
-            print("\rDownloading: " + "%.0f" % int(file_path.stat().st_size / 1048576) + "MB / "
-                  + total_size + "MB", end="", flush=True)
+            print(
+                f"{BACK_CYAN}  INFO  {BACK_RESET}  Downloading: " + "%.0f" % int(file_path.stat().st_size / 1048576)
+                + " MB / " + total_size + " MB"
+            )
         except FileNotFoundError:
             time.sleep(0.5)
 
