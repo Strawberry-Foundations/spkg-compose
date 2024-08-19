@@ -108,7 +108,7 @@ class Routines:
             with open(self.server.index, "r") as json_file:
                 index = json.load(json_file)
         else:
-            index = {}
+            index = {"ignore_packages": []}
 
         # Iterate data dir for *.spkg files
         for root, _, files in os.walk(self.server.config.data_dir):
@@ -121,7 +121,7 @@ class Routines:
                     name = package.meta.id
 
                     # If cached data is not in index, add data to index.json
-                    if name not in index:
+                    if name not in index and name not in index["ignore_packages"]:
                         i += 1
                         rt_logger.info(f"Found new compose package '{CYAN}{name}{CRESET}'")
                         specfile_path = file_path.replace("/compose.spkg", "/specfile.yml")
