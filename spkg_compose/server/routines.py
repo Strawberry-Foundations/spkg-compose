@@ -180,6 +180,9 @@ class Routines:
         rt_logger.ok(f"Finished checkout")
 
     def fetch_git(self, rt_logger: RtLogger):
+        with open(self.server.index, "r") as json_file:
+            index = json.load(json_file)
+
         for root, _, files in os.walk(self.config.data_dir):
             for file in files:
                 if file.endswith('.spkg'):
@@ -189,7 +192,7 @@ class Routines:
                     package = SpkgBuild(data)
                     repo_url = package.meta.source
 
-                    if repo_url.startswith("https://github.com"):
+                    if repo_url.startswith("https://github.com") and package.meta.id not in index["ignore_packages"]:
                         git = GitHubApi(
                             repo_url=repo_url,
                             api_token=self.config.gh_token,
