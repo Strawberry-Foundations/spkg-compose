@@ -1,0 +1,26 @@
+[Meta]
+Name=Recontrolled
+Id=recontrolled
+Description=A simple program to control the on-board LEDs of your Raspberry Pi!
+Version=git+3.2.0
+Architecture=%runtime_arch%
+Author=Strawberry Foundations <info@strawberryfoundations.org>
+Source=https://github.com/Strawberry-Foundations/recontrolled
+	
+[Prepare]
+Type=Archive // Types: Git, Archive, BinaryArchive, Binary
+URL=https://github.com/Strawberry-Foundations/recontrolled/archive/refs/heads/main.tar.gz
+
+[Build]
+BuildSys=cargo
+Workdir=recontrolled-main
+
+[Build.cargo]
+Exec=cargo build --release
+
+[Install]
+As=deb // As: deb, binpkg
+
+[Install.deb]
+Prefix=/usr/bin/
+Target=target/release/recontrolled

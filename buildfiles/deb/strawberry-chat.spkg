@@ -19,8 +19,8 @@ Workdir=strawberry-chat-1.13.2
 Exec=cargo build --release
 
 [Install]
-As=binpkg // As: deb, binpkg
+As=deb // As: deb, binpkg
 
-[Install.binpkg]
+[Install.deb]
 Prefix=/usr/bin/
 Target=target/release/strawberry-chat
